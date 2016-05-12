@@ -1,0 +1,25 @@
+# vim: syntax=gitconfig
+
+[user]
+name = mle
+email = maximilian@eul.cc
+
+[core]
+autocrlf = input
+
+[color]
+ui = auto
+
+[alias]
+ann = annotate
+annot = annotate
+stashes = stash list
+remotes = remote -v
+ci = commit
+
+[push]
+default = simple
+
+[credential]
+helper = cache
+
