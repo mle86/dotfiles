@@ -1,0 +1,44 @@
+#!/bin/sh -f
+# mle 2014-01
+PROGNAME=$(basename -- "$0")
+
+FIND=/usr/bin/find
+SEPARATOR=','
+f_arg='-name'
+f_op='-or'
+
+if [ "$1" = "-i" ]; then
+	f_arg='-iname'
+	shift
+fi
+
+if [ -z "$1" ]; then
+	echo "Syntax: $PROGNAME [-i] PATTERN... [, FINDOPTS]" >&2
+	exit 1
+fi
+
+lastopt=""
+opt="$f_arg	$1"
+shift
+
+# add -name/-iname expressions
+while [ -n "$1" ]; do
+	if [ "$1" = "$SEPARATOR" ]; then
+		shift
+		break
+	fi
+	opt="$opt	$f_op	$f_arg	$1"
+	shift
+done
+
+# add regular options
+while [ -n "$1" ]; do
+	lastopt="$lastopt	$1"
+	shift
+done
+
+
+IFS="	"  # tab only
+
+exec $FIND '(' $opt ')' $lastopt
+

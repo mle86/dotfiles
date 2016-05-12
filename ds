@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+# mle 2016-03
+
+if (defined $ARGV[0]) {
+	chdir(shift @ARGV)
+	or die "chdir() failed: $!"
+}
+
+my $do_colors = (-t STDOUT);
+my %color = (
+	'dir'		=> '[1;34m',
+	'backup'	=> '[38;5;247m',
+	'sgr0'		=> '[0m',
+
+	'K'		=> '[1;38;5;159m',
+	'M'		=> '[1;38;5;192m',
+	'G'		=> '[1;38;5;220m',
+	'T'		=> '[1;38;5;205m',
+	'P'		=> '[1;38;5;199m',
+);
+sub color {
+	if (-d $_[0]) { return "$color{dir}$_[0]$color{sgr0}" }
+	elsif (-f $_[0] && $_[0] =~ m/~$|\.bkup|\.bak|\.swp/) { return "$color{backup}$_[0]$color{sgr0}" }
+	else { return $_[0] }
+}
+
+my $cmd =
+	'du --max-depth=1 --all --human-readable --null --no-dereference --dereference-args' .
+	'| sort --zero-terminated --human-numeric-sort';
+my @lines = split /\0/, `$cmd`;
+
+
+foreach (@lines) {
+	m/^([\d,\.]+[A-Z]?)(\s+)(.+)$/i or next;
+	my ($size, $sep, $path) = ($1, $2, $3);
+
+	# padding:
+	$size = ' ' . $size  if (length $size < 4);
+
+	# colorize size suffix:
+	$size =~ s/([A-Z]+)/$color{$1}$1$color{'sgr0'}/i  if $do_colors;
+
+	# insert additional space before si suffix:
+	$size =~ s/([A-Z]|$)/ $1/;
+
+	# omit final "." line:
+	next if $path eq '.';
+
+	# strip leading "./":
+	$path =~ s/^\.\///;
+
+	# colorize:
+	$path = color($path)  if $do_colors;
+
+	print $size . $sep . $path . "\n";
+}
+
