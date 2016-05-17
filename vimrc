@@ -35,6 +35,10 @@ highlight LineNr ctermfg=0 ctermbg=0 cterm=bold
 
 autocmd BufRead,BufNewFile *.php colorscheme mle-php
 
+" Alt-X shortcut for external commands.
+map <ESC>x  :!
+imap <ESC>x <C-O>:!
+
 
 """""""""""""""""""""
 
