@@ -5,12 +5,12 @@
 # The arguments are all enclosed in highlighted square brackets
 # to avoid spacing ambiguity.
 
-[ -n "$1" ] || exit 0
+[ $# -eq 0 ] && exit  # suppress empty line
 
 M1="[1m"
 M0="[0m"
 
-while [ -n "$1" ]; do
+while [ $# -gt 0 ]; do
 	echo -n "${M1}[${M0}$1${M1}]${M0} "
 	shift
 done
