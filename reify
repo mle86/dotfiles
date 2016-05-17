@@ -1,0 +1,231 @@
+#!/usr/bin/perl -w
+
+use File::Basename qw(dirname basename);
+use Cwd qw(getcwd);
+
+use constant {
+	PROGNAME	=> 'reify',
+	PROGVER		=> '1.0',
+	PROGDATE	=> '2014-10-31',
+
+	INITIALDIR	=> getcwd(),
+
+	CP    => '/bin/cp',
+	LN    => '/bin/ln',
+	FIND  => '/usr/bin/find',
+	XARGS => '/usr/bin/xargs',
+};
+
+sub perror ($) { print STDERR PROGNAME.": @_\n" }
+
+our ($Return, $Verbose, $Quiet, $Flat) = (0);
+use Getopt::Long qw(:config no_getopt_compat bundling);
+GetOptions(
+	'h|help'	=> \&show_help,
+	'V|version'	=> \&show_version,
+	'v|verbose'	=> \$Verbose,
+	'q|quiet'	=> \$Quiet,
+	'd|flat'	=> \$Flat,
+);
+
+if (! @ARGV) {
+	perror "no filename operand";
+	exit 1
+}
+
+# return value bitmask:
+#  1  no filename operand
+#  2  file not found
+#  4  source file does not exist (invalid symlink)
+#  8  file operand is not a symlink
+# 16  unable to change owner/mode of copied file
+
+
+################################################################################
+
+foreach (@ARGV) {
+
+	s#/+$##;
+
+	if (! lstat()) {
+		perror "file not found: $_";
+		$Return |= 2;
+		next
+	}
+
+	if (! -l) {
+		if (! $Quiet) {
+			perror "file is not a symlink: $_";
+			$Return |= 8;
+		}
+		next
+	}
+
+	if (! -e) {
+		perror "source file does not exist: $_";
+		$Return |= 4;
+		next
+	}
+
+
+	my $source = readlink $_;
+
+	print "$_\n"  if $Verbose;
+
+
+	if (-d && $Flat) {
+		reify_flat_directory($_, $source)
+	} else {
+		reify_file($_, $source)
+	}
+
+}
+
+
+exit $Return;
+
+################################################################################
+
+
+#sub cleanpath ($) {
+#	no warnings;
+#	$_[0] =~ s#(?:^(?:\./+|)+|([^/\.])(?:/+\.?)+$)#$1#g;
+#	$_[0] =~ s#(?:/+(?:\./+)+|/{2,})#/#g;
+#	$_[0] =~ s#^/(\.\./)+##;
+#	if ($_[0] eq '.') {
+#		$_[0] = '';
+#		return 0
+#	}
+#	return (()= ($_[0] =~ m#[^/]++#g));  # force list context for match count
+#}
+
+sub fix_relpath ($$) {
+	# this function must not remove the trailing \000 from reify_flat_directory()'s stdout filter!
+	my ($filename, $srcdir) = @_;
+	return ($srcdir =~ m#^/#)
+		? $filename
+		: "../$filename";
+}
+
+sub fix_mode {
+	my ($newname, $source) = @_;
+	return 1 if -l $newname;
+	
+	my $nm = (stat $newname)[2] & 07777;
+	my $sm = (stat $source )[2] & 07777;
+	return if ($nm == $sm);
+	
+	if (! chmod($sm, $newname) && ! $Quiet) {
+		perror "unable to change mode of $newname: $!";
+		$Return |= 16;
+	}
+}
+
+sub fix_owner {
+	my ($newname, $source) = @_;
+	return if -l $newname;
+	
+	my @nst = stat $newname;
+	my @sst = stat $source;
+	return if ($nst[4] == $sst[4] && $nst[5] == $sst[5]);
+	
+	if (! chown($sst[4], $sst[5], $newname) && ! $Quiet) {
+		perror "unable to change owner of $newname: $!";
+		$Return |= 16;
+	}
+}
+
+sub reify_file {
+	my ($newname, $source) = @_;
+	unlink $newname;
+
+	chdir INITIALDIR;
+	chdir dirname($newname);
+	$newname = basename($newname);
+
+	my $ret =
+	system CP, '-aPR', $source, $newname;
+
+	if (! $Quiet) {
+		# cp should have copied mode and ownership already,
+		# but it won't complain if that failed.
+		fix_owner($newname, $source);
+		fix_mode ($newname, $source);
+	}
+
+	(0 == $ret)
+}
+
+sub reify_flat_directory {
+	my ($newname, $source) = @_;
+
+	chdir INITIALDIR;
+	chdir dirname($newname);
+	$newname = basename($newname);
+
+	unlink $newname;
+	mkdir  $newname;
+	fix_owner($newname, $source);
+	fix_mode ($newname, $source);
+
+	# find | fix_relpath | xargs ln
+
+	binmode(STDOUT);
+	local $| = 1;
+
+	my @filters = filter_stdio(STDOUT,
+		sub{ exec XARGS, '-0r', LN, '-st', $newname },
+		sub{ $/ = "\000"; while(<STDIN>){ print fix_relpath($_, $source) } },
+	);
+
+	system FIND, $source, qw(-mindepth 1 -maxdepth 1 -print0);
+
+	filter_revert(@filters);
+}
+
+sub filter_stdio (@) {
+	my ($fh, $old_stdout, @filter_pid) = (shift());
+	my (@mode) = ($fh eq STDIN) ? ('-|', '<&') : ('|-', '>&');
+	open($old_handle, $mode[1], $fh);
+	for my $callback (@_) {
+		my $filter_pid = open($fh, $mode[0]);
+		if (! defined($filter_pid)) {
+			perror "could not fork: $!";
+			exit 128
+		} elsif ($filter_pid == 0) {
+			$callback->( );
+			exit 0
+		}
+		push @filter_pid, $filter_pid;
+	}
+
+	return ($fh, $old_handle, @filter_pid)
+}
+
+sub filter_revert (@) {
+	open(shift, '>&', shift);
+	waitpid($_, 0)  foreach (@_);
+	($? == 0)
+}
+
+sub show_help { printf <<ZHELP, PROGNAME;
+usage: %s [OPTIONS] FILENAME...
+Converts symlinks to actual files by copying their link destination.
+Symlinked directories will be copied recursively.
+  -d, --flat	Directories won't be copied recursively,
+  		but filled with symlinks to the original directories' contents.
+  -q, --quiet	Ignore non-symlink files, don't report mode/ownership problems
+  -v, --verbose	Report every copied file.
+  -V, --version	Shows version and licensing information.
+  -h, --help	Shows this help.
+
+ZHELP
+exit 0 }
+
+sub show_version { printf <<ZVERSION, PROGNAME, PROGVER, PROGDATE;
+%s %s
+Written by Maximilian L. Eul <mle\@multinion.de>, %s.
+
+ZVERSION
+exit 0 }
+
