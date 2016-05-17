@@ -1,0 +1,65 @@
+#!/bin/sh
+
+RM_OPTIONS='-v --one-file-system --preserve-root'
+LS_OPTIONS='-A'
+
+if [ -z "$2" ]; then
+	echo "syntax: $(basename "$0") [-n] N DIR/FILE [FILE...]" >&2
+	echo "Will delete all FILEs or all files in DIR except for the newest N." >&2
+	echo "With the -n option, no files wil be deleted, but their names will be printed." >&2
+	echo "" >&2
+	exit 1
+fi
+
+dry_run=
+if [ "$1" = "-n" ]; then
+	dry_run=1
+	shift
+fi
+
+N=$1
+shift
+if [ "$N" -lt 1 ]; then
+	echo "$(basename "$0"): N cannot be lower than 1" >&2
+	exit 2
+fi
+
+
+files=
+filesep="	"
+addfile () {
+	[ -z "$files" ] || files="${files}${filesep}"
+	files="${files}$1"
+#	files="${files}$(readlink -f "$1")"
+}
+
+if [ -d "$1" ]; then
+	for fn in $1/*; do
+		[ -f "$fn" ] && addfile "$fn"
+	done
+else
+	for fn in $@; do
+		[ -f "$fn" ] && addfile "$fn"
+	done
+fi
+
+if [ -z "$files" ]; then
+	echo "$(basename "$0"): no files" >&2
+	exit 3
+fi
+
+
+del_files=$( /bin/ls $LS_OPTIONS -1drt -- $files | head -n -${N} )
+
+if [ -z "$del_files" ]; then
+	echo "$(basename "$0"): no files to delete" >&2
+	exit 4 
+fi
+
+if [ "$dry_run" ]; then
+	echo "$(basename "$0"): files to delete:" >&2
+	echo "$del_files"
+	exit 5
+fi
+
+/bin/rm $RM_OPTIONS -- $del_files
