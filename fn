@@ -1,44 +1,62 @@
-#!/bin/sh -f
+#!/bin/sh 
 # mle 2014-01
 PROGNAME=$(basename -- "$0")
 
 FIND=/usr/bin/find
 SEPARATOR=','
-f_arg='-name'
-f_op='-or'
+FINDPATH='.'
 
+syntax () {
+	echo "Syntax: $PROGNAME [-i] PATTERN... [, FINDOPTS...]" >&2
+	exit 1
+}
+
+f_joinop='-or'
+
+f_nameop='-name'
 if [ "$1" = "-i" ]; then
-	f_arg='-iname'
+	f_nameop='-iname'
 	shift
 fi
 
-if [ -z "$1" ]; then
-	echo "Syntax: $PROGNAME [-i] PATTERN... [, FINDOPTS]" >&2
-	exit 1
-fi
+[ $# -gt 0 ] || syntax
 
-lastopt=""
-opt="$f_arg	$1"
-shift
-
-# add -name/-iname expressions
-while [ -n "$1" ]; do
+# Read filename patterns:
+patterns=
+join=
+p=0
+while [ $# -gt 0 ]; do
 	if [ "$1" = "$SEPARATOR" ]; then
+		# Stop, the rest of the arguments are regular find options,
+		# we can just use them as "$@"
+
+		[ $p -gt 0 ] || syntax  # syntax error, no patterns present
+
 		shift
 		break
 	fi
-	opt="$opt	$f_op	$f_arg	$1"
+
+	# Store the pattern arg in $patternN for now.
+	# This evades quoting problems and works fine for more than 9 arguments too.
+	eval "pattern${p}=\$1"
 	shift
+
+	# add "-name $patternN" template
+	patterns="$patterns $join $f_nameop \"\$pattern${p}\""
+
+	join="$f_joinop"
+	p=$((p + 1))
 done
 
-# add regular options
-while [ -n "$1" ]; do
-	lastopt="$lastopt	$1"
-	shift
-done
+# If the command line had additional FINDOPTS, they are in $@ now,
+# so we need no special handling for them.
 
+# Build the command template:
+findcmd="\$FIND \$findpath '(' $patterns ')' \"\$@\""
 
-IFS="	"  # tab only
+# Now $findcmd is a command template, i.e. it contains a lot of quotes and escaped $variables.
+# A simple eval will correctly evaluate it to the find command
+# with appropriately-quoted arguments:
 
-exec $FIND '(' $opt ')' $lastopt
+eval exec $findcmd
 
