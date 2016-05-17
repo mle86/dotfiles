@@ -1,26 +1,28 @@
 #!/bin/sh
+# mle 2013-04
+PROGNAME=$(basename -- "$0")
 
 RM_OPTIONS='-v --one-file-system --preserve-root'
 LS_OPTIONS='-A'
 
 if [ -z "$2" ]; then
-	echo "syntax: $(basename "$0") [-n] N DIR/FILE [FILE...]" >&2
+	echo "syntax: $PROGNAME [-n] N DIR|FILE [FILE...]" >&2
 	echo "Will delete all FILEs or all files in DIR except for the newest N." >&2
-	echo "With the -n option, no files wil be deleted, but their names will be printed." >&2
+	echo "With the -n option, no files will be deleted, but their names will be printed." >&2
 	echo "" >&2
 	exit 1
 fi
 
 dry_run=
 if [ "$1" = "-n" ]; then
-	dry_run=1
+	dry_run=yes
 	shift
 fi
 
-N=$1
+n=$1
 shift
-if [ "$N" -lt 1 ]; then
-	echo "$(basename "$0"): N cannot be lower than 1" >&2
+if [ "$n" -lt 1 ]; then
+	echo "$PROGNAME: N cannot be lower than 1" >&2
 	exit 2
 fi
 
@@ -44,7 +46,7 @@ else
 fi
 
 if [ -z "$files" ]; then
-	echo "$(basename "$0"): no files" >&2
+	echo "$PROGNAME: no files" >&2
 	exit 3
 fi
 
@@ -52,12 +54,12 @@ fi
 del_files=$( /bin/ls $LS_OPTIONS -1drt -- $files | head -n -${N} )
 
 if [ -z "$del_files" ]; then
-	echo "$(basename "$0"): no files to delete" >&2
+	echo "$PROGNAME: no files to delete" >&2
 	exit 4 
 fi
 
 if [ "$dry_run" ]; then
-	echo "$(basename "$0"): files to delete:" >&2
+	echo "$PROGNAME: files to delete:" >&2
 	echo "$del_files"
 	exit 5
 fi
