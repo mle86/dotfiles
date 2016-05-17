@@ -13,7 +13,7 @@ alias c89='gcc -O -std=c89 -Wall -Wextra -pedantic'
 alias c='c99'
 
 alias gs='git status'
-alias gb='git branch -a'
+alias gb='git branch -avv'
 alias ga='git add -p'
 alias gd='git diff --diff-algorithm=minimal'
 alias gdc='git diff --diff-algorithm=minimal --cached'
