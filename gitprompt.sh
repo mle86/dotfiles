@@ -36,8 +36,10 @@ _setprompt () {
 		changes=${changes:-" "}
 
 		branch="$branch_color$branch"
+		local _remote_ahead=
+		local _local_ahead=
 		read -r _remote_ahead _local_ahead < <(git rev-list  --count  --left-right @{u}...  2>/dev/null)
-		[ -n "$_local_ahead" ]  && [ "$_local_ahead"  -gt 0 ] && local_commits="$local_commits_color$_local_ahead "
+		[ -n "$_local_ahead"  ] && [ "$_local_ahead"  -gt 0 ] && local_commits="$local_commits_color$_local_ahead "
 		[ -n "$_remote_ahead" ] && [ "$_remote_ahead" -gt 0 ] && remote_commits="$remote_commits_color$_remote_ahead "
 	fi
 
