@@ -18,17 +18,17 @@ _setprompt () {
 	local cwd_color='\[[1;37m\]'
 	local sgr0='\[[0m\]'
 
-	local local_commits=
-	local remote_commits=
-	local changes=
 	local local_commits_color=$info_color
+	local branch_color=$info_color
 	local remote_commits_color='\[[0;38;5;160m\]'
 	local changes_color='\[[0;38;5;121m\]'
 
-	local branch_color=$info_color
+	local local_commits=
+	local remote_commits=
+	local changes=
 	local branch=$(git rev-parse  --abbrev-ref HEAD  2>/dev/null)
 
-	branch=$(_shorten_git_branch "${branch}")
+	branch=$(_shorten_git_branch "$branch")
 
 	if [ -n "$branch" ]; then
 		changes=$(git status  --porcelain  --untracked-files=no  2>/dev/null)
@@ -68,18 +68,10 @@ _setprompt () {
 
 _shorten_git_branch () {
 	case "$1" in
-		master)
-			echo "mst"
-			;;
-		revision-*)
-			echo "r-${1#*-}"
-			;;
-		feature-*)
-			echo "f-${1#*-}"
-			;;
-		*)
-			echo "$1"
-			;;
+		master)		echo "mst" ;;
+		revision-*)	echo "r-${1#*-}" ;;
+		feature-*)	echo "f-${1#*-}" ;;
+		*)		echo "$1" ;;
 	esac
 }
 
