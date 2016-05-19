@@ -23,11 +23,26 @@ _setprompt () {
 	local remote_commits_color='\[[0;38;5;160m\]'
 	local changes_color='\[[0;38;5;121m\]'
 	local untracked_color='\[[1;38;5;88m\]'
+	local rebase_commit_color='\[[0;38;5;141m\]'
+	local init_commit_color='\[[0;38;5;255m\]'
 
 	local local_commits=
 	local remote_commits=
 	local changes=
 	local branch=$(git rev-parse  --abbrev-ref HEAD  2>/dev/null)
+
+	if [ "$branch" = "HEAD" ]; then
+		local gitdir=$(git rev-parse --git-dir)
+		if [ -d "$gitdir/rebase-merge/" ]; then
+			# it's an interactive rebase
+			local rebase_commit=$(git rev-parse --short HEAD)
+			local rebase_branch=$(git rev-parse --abbrev-ref "$(cat .git/rebase-merge/head-name)")
+			branch="$rebase_branch $rebase_commit_color$rebase_commit"
+		else
+			# it's a fresh repo
+			branch="INIT"
+		fi
+	fi
 
 	branch=$(_shorten_git_branch "$branch")
 
