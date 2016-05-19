@@ -143,5 +143,11 @@ set_ls_colors () {
 set_ls_colors ; unset -f set_ls_colors
 
 
+###  Includes:  ##################################################
+
+[ -r ~/.prompt ] && . ~/.prompt
+[ -r ~/.extra ] && . ~/.extra
+
+
 ###  Ende  #######################################################
 return 0
