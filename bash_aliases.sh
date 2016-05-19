@@ -2,7 +2,13 @@
 
 ###  Einstellungen:  #############################################
 
-LS_OPTIONS="$LS_OPTIONS -F"
+LS_OPTIONS="-h --color=auto -F"
+
+alias grep='grep --color=auto'
+alias ls='ls $LS_OPTIONS'
+
+export EDITOR='vim'
+export LESS='-R'
 
 
 ###  Abkürzungen:  ###############################################
