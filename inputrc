@@ -5,10 +5,7 @@ set completion-ignore-case on
 # immediately show completion options, no more double-<Tab>
 set show-all-if-ambiguous on
 
-# history-searching completion with ↑, ↓
-"\e[B": history-search-forward
-"\e[A": history-search-backward
-# same functions for PgUp, PgDn
+# history prefix searching with PgUp, PgDn
 "\e[5~": history-search-backward
 "\e[6~": history-search-forward
 
