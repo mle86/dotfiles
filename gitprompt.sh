@@ -51,10 +51,9 @@ _setprompt () {
 
 		changes=$(git status  --porcelain  --untracked-files=no  2>/dev/null | sed q)
 		changes=${changes:+"${changes_color}*"}
-		if [ -z "$changes" ]; then
-			changes=$(git ls-files  --others  --exclude-standard  2>/dev/null | sed q)
-			changes=${changes:+"${untracked_color}·"}
-		fi
+		[ -z "$changes" ] && \
+			git status  --porcelain --untracked-files=normal  2>/dev/null  | grep -q '^?? ' &&
+			    changes="${untracked_color}·"
 		changes=${changes:-" "}
 
 		local _remote_ahead=
