@@ -12,6 +12,10 @@ export LESS='-R'
 
 unset IGNOREEOF
 
+if [ "$TERM" = "xterm" ]; then
+	export TERM="xterm-256color"
+fi
+
 
 ###  Abkürzungen:  ###############################################
 
