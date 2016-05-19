@@ -102,7 +102,7 @@ dx () {
 
 ###  ls-Farben:  #################################################
 
-_set_ls_colors () {
+set_ls_colors () {
 	local archive='38;5;203'
 	local picture='01;35'
 	local audio='00;36'
@@ -110,10 +110,31 @@ _set_ls_colors () {
 	local info='38;5;221'
 	local backup='38;5;242'
 
-	LS_COLORS="rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=$archive:*.tgz=$archive:*.arj=$archive:*.taz=$archive:*.lzh=$archive:*.lzma=$archive:*.tlz=$archive:*.txz=$archive:*.zip=$archive:*.z=$archive:*.Z=$archive:*.dz=$archive:*.gz=$archive:*.lz=$archive:*.xz=$archive:*.bz2=$archive:*.bz=$archive:*.tbz=$archive:*.tbz2=$archive:*.tz=$archive:*.deb=$archive:*.rpm=$archive:*.jar=$archive:*.rar=$archive:*.ace=$archive:*.zoo=$archive:*.cpio=$archive:*.7z=$archive:*.rz=$archive:*.jpg=$picture:*.jpeg=$picture:*.gif=$picture:*.bmp=$picture:*.pbm=$picture:*.pgm=$picture:*.ppm=$picture:*.tga=$picture:*.xbm=$picture:*.xpm=$picture:*.tif=$picture:*.tiff=$picture:*.png=$picture:*.svg=$picture:*.svgz=$picture:*.mng=$picture:*.pcx=$picture:*.mov=$video:*.mpg=$video:*.mpeg=$video:*.m2v=$video:*.mkv=$video:*.ogm=$video:*.mp4=$video:*.m4v=$video:*.mp4v=$video:*.vob=$video:*.qt=$video:*.nuv=$video:*.wmv=$video:*.asf=$video:*.rm=$video:*.rmvb=$video:*.flc=$video:*.avi=$video:*.fli=$video:*.flv=$video:*.gl=$video:*.dl=$video:*.xcf=$video:*.xwd=$video:*.yuv=$video:*.cgm=$video:*.emf=$video:*.axv=$video:*.anx=$video:*.ogv=$video:*.ogx=$video:*.aac=$audio:*.au=$audio:*.flac=$audio:*.mid=$audio:*.midi=$audio:*.mka=$audio:*.mp3=$audio:*.mpc=$audio:*.ogg=$audio:*.ra=$audio:*.wav=$audio:*.axa=$audio:*.oga=$audio:*.spx=$audio:*.xspf=$audio:*README=$info:*README.md=$info:*TODO=$info:*INFO=$info:*AUTHOR=$info:*INSTALL=$info:*CHANGELOG=$info:*.bkup=$backup:*.bak=$backup:*~=$backup:*.swp=$backup"
-}
-_set_ls_colors ; unset -f _set_ls_colors
+	LS_COLORS="rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32"
 
+	_set_ls_color () {
+		local color="$1"
+		shift
+
+		while [ -n "$1" ]; do
+			LS_COLORS="${LS_COLORS}:*${1}=${color}"
+			shift
+		done
+	}
+
+	_set_ls_color $archive .tar .tgz .tbz .tbz2 .bz .bz2 .txz .xz .7z .gz .z .Z .zip .rar
+	_set_ls_color $archive .arj .taz .lzh .lzma .tlz .dz .lz .tz .jar .ace .cpio .rz
+	_set_ls_color $archive .zoo .deb .rpm
+	_set_ls_color $picture .jpg .jpeg .gif .bmp .pbm .pgm .ppm .tga .xbm .xpm .tif .tiff .png .svg .svgz .mng .pcx
+	_set_ls_color $video .mov .mpg .mpeg .m2v .mkv .ogm .mp4 .m4v .mp4v .vob .qt .nuv .wmv .asf .rm .rmvb
+	_set_ls_color $video .flc .avi .fli .flv .gl .dl .xcf .xwd .yuv .cgm .emf .axv .anx .ogv .ogx
+	_set_ls_color $audio .aac .au .flac .mid .midi .mka .mp3 .mpc .ogg .ra .wav .axa .oga .spx .xspf
+	_set_ls_color $info README README.md TODO INFO AUTHOR INSTALL CHANGELOG
+	_set_ls_color $backup .bkup .bak ~ .swp
+
+	unset -f _set_ls_color
+}
+set_ls_colors ; unset -f set_ls_colors
 
 ###  man-Farben:  ################################################
 
