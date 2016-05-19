@@ -22,6 +22,7 @@ _setprompt () {
 	local branch_color=$info_color
 	local remote_commits_color='\[[0;38;5;160m\]'
 	local changes_color='\[[0;38;5;121m\]'
+	local untracked_color='\[[1;38;5;88m\]'
 
 	local local_commits=
 	local remote_commits=
@@ -31,8 +32,12 @@ _setprompt () {
 	branch=$(_shorten_git_branch "$branch")
 
 	if [ -n "$branch" ]; then
-		changes=$(git status  --porcelain  --untracked-files=no  2>/dev/null)
-		changes=${changes:+"$changes_color*"}
+		changes=$(git status  --porcelain  --untracked-files=no  2>/dev/null | sed q)
+		changes=${changes:+"${changes_color}*"}
+		if [ -z "$changes" ]; then
+			changes=$(git ls-files --others --exclude-standard | sed q)
+			changes=${changes:+"${untracked_color}·"}
+		fi
 		changes=${changes:-" "}
 
 		branch="$branch_color$branch"
