@@ -29,24 +29,26 @@ _setprompt () {
 	local local_commits=
 	local remote_commits=
 	local changes=
+	local rebase=
 	local branch=$(git rev-parse  --abbrev-ref HEAD  2>/dev/null)
 
 	if [ "$branch" = "HEAD" ]; then
-		local gitdir=$(git rev-parse --git-dir)
+		local gitdir=$(git rev-parse  --git-dir)
 		if [ -d "$gitdir/rebase-merge/" ]; then
 			# it's an interactive rebase
-			local rebase_commit=$(git rev-parse --short HEAD)
-			local rebase_branch=$(git rev-parse --abbrev-ref "$(cat .git/rebase-merge/head-name)")
-			branch="$rebase_branch $rebase_commit_color$rebase_commit"
+			local rebase_commit=$(git rev-parse  --short HEAD)
+			local rebase_branch=$(git rev-parse  --abbrev-ref "$(cat .git/rebase-merge/head-name)")
+			branch=$rebase_branch
+			rebase=" $rebase_commit_color$rebase_commit"
 		else
 			# it's a fresh repo
 			branch="INIT"
 		fi
 	fi
 
-	branch=$(_shorten_git_branch "$branch")
-
 	if [ -n "$branch" ]; then
+		branch="$branch_color$(_shorten_git_branch "$branch")"
+
 		changes=$(git status  --porcelain  --untracked-files=no  2>/dev/null | sed q)
 		changes=${changes:+"${changes_color}*"}
 		if [ -z "$changes" ]; then
@@ -55,7 +57,6 @@ _setprompt () {
 		fi
 		changes=${changes:-" "}
 
-		branch="$branch_color$branch"
 		local _remote_ahead=
 		local _local_ahead=
 		read -r _remote_ahead _local_ahead < <(git rev-list  --count  --left-right @{u}...  2>/dev/null)
@@ -72,7 +73,7 @@ _setprompt () {
 	local prefix="$prefix_color❮ "
 	local suffix="$suffix_color❯ "
 
-	PS1="$prefix$branch$changes$remote_commits$local_commits$cwd_color\\w$suffix$sgr0"
+	PS1="$prefix$branch$rebase$changes$remote_commits$local_commits$cwd_color\\w$suffix$sgr0"
 
 	# show current path in terminal headline:
 	case "$TERM" in
