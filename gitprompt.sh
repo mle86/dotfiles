@@ -52,7 +52,7 @@ _setprompt () {
 		changes=$(git status  --porcelain  --untracked-files=no  2>/dev/null | sed q)
 		changes=${changes:+"${changes_color}*"}
 		if [ -z "$changes" ]; then
-			changes=$(git ls-files --others --exclude-standard | sed q)
+			changes=$(git ls-files  --others  --exclude-standard  2>/dev/null | sed q)
 			changes=${changes:+"${untracked_color}·"}
 		fi
 		changes=${changes:-" "}
