@@ -1,0 +1,32 @@
+# shamelessly stol^H^H^H^Hinspired by https://github.com/paulirish/dotfiles/blob/master/.inputrc
+
+set completion-ignore-case on
+
+# immediately show completion options, no more double-<Tab>
+set show-all-if-ambiguous on
+
+# history-searching completion with ↑, ↓
+"\e[B": history-search-forward
+"\e[A": history-search-backward
+# same functions for PgUp, PgDn
+"\e[5~": history-search-backward
+"\e[6~": history-search-forward
+
+# fix Ctrl-←, Ctrl-→
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
+
+# don't show hidden files in autocompletion list, only if there's already a dot on the cmdline  
+set match-hidden-files off
+
+# show / and * suffixes, like ls -F
+set visible-stats on
+
+# clean autocompletion if there's text after the cursor
+set skip-completed-text on
+
+# UTF-8
+set input-meta on
+set output-meta on
+set convert-meta off
+
