@@ -1,5 +1,4 @@
 #!/bin/sh
-# vim: syntax=sh
 
 ###  Einstellungen:  #############################################
 
@@ -100,7 +99,14 @@ dx () {
 }
 
 
-###  ls-Farben:  #################################################
+###  Farben:  ####################################################
+
+# man-Farben
+export LESS_TERMCAP_so='[48;5;220;30m'    # begin standout-mode - info box, search results
+export LESS_TERMCAP_se='[0m'           # end standout-mode
+export LESS_TERMCAP_md='[1;38;2;244;255;210m'
+
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 set_ls_colors () {
 	local archive='38;5;203'
@@ -136,14 +142,6 @@ set_ls_colors () {
 }
 set_ls_colors ; unset -f set_ls_colors
 
-###  man-Farben:  ################################################
 
-export LESS_TERMCAP_so='[48;5;220;30m'    # begin standout-mode - info box, search results
-export LESS_TERMCAP_se='[0m'           # end standout-mode
-export LESS_TERMCAP_md='[1;38;2;244;255;210m'
-
-
-###  gcc-Farben:  ################################################
-
-export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-
+###  Ende  #######################################################
+return 0
