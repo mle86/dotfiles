@@ -17,6 +17,8 @@ alias ga='git add -p'
 alias gd='git diff --diff-algorithm=minimal'
 alias gdc='git diff --diff-algorithm=minimal --cached'
 
+alias myip='curl https://ip.eul.cc/'
+
 tf () {
 	local file="${1:-/var/log/syslog}"
 	[ -n "$1" ] && shift
