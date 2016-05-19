@@ -21,6 +21,8 @@ alias '..'='cd ..'
 alias '...'='cd ../..'
 alias -- '-'='cd - >/dev/null'
 
+alias l='ls $LS_OPTIONS -l'
+
 alias c99='gcc -O -std=c99 -Wall -Wextra -pedantic'
 alias c89='gcc -O -std=c89 -Wall -Wextra -pedantic'
 alias c='c99'
