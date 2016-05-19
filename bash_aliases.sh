@@ -2,6 +2,8 @@
 
 ###  Einstellungen:  #############################################
 
+umask 002
+
 LS_OPTIONS="-h --color=auto -F"
 
 alias grep='grep --color=auto'
