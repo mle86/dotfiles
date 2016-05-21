@@ -28,15 +28,16 @@ z () { echo -n "$ansi_dark ($(findcmd "$@")) " ; "$@" ; echo -n "$ansi_reset" ; 
 # findcmd command [arguments...]
 # Tries to determine the actual command.
 # If there's an echo/mv/ln/cp/rm somewhere in "command arguments...",
-# it's printed; if not, "?" is printed.
+# it's printed; if not, $command (the first argument) is printed.
 # This is used in conjunction with z() to obtain the command name,
 # where we don't want to simply print "xargs" for a xargs command line.
 findcmd () {
+	local first="$1"
 	while [ $# -gt 0 ]; do case "$1" in
 		echo|mv|ln|cp|rm)  echo "$1" ; return ;;
 		*)  shift ;;
 	esac done
-	echo "?"
+	echo "$first"
 }
 
 # is_yes()
