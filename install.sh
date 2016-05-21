@@ -26,6 +26,7 @@ findcmd () {
 
 is_yes () { [ "$ANSWER" = 'y' -o "$ANSWER" = 'Y' -o "$ANSWER" = 'yes' -o "$ANSWER" = 'j' -o "$ANSWER" = 'J' ]; }
 is_no  () { [ "$ANSWER" = 'n' -o "$ANSWER" = 'N' -o "$ANSWER" = 'no' ]; }
+is     () { [ "$ANSWER" = "$1" -o "$ANSWER" = "$(echo -n "$1" | tr '[:upper:]' '[:lower:]')" ]; }
 is_absolute_path () { [ "/${1#/}" = "$1" ]; }
 
 ask () {
@@ -175,7 +176,7 @@ while true; do
 		break
 	elif is_no; then
 		break
-	elif [ "$ANSWER" = 'l' ] || [ "$ANSWER" = 'L' ]; then
+	elif is L; then
 		ls -1Alh $HERE/vim/colors/
 	fi
 done
