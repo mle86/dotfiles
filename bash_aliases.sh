@@ -2,6 +2,9 @@
 
 ###  Einstellungen:  #############################################
 
+# Source all system profile scripts if this a non-login first-level shell, e.g. if this is an xterm.
+[ $SHLVL -eq 1 ] && ! shopt -q login_shell 2>/dev/null && . /etc/profile
+
 umask 002
 
 LS_OPTIONS="-h --color=auto -F"
