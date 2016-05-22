@@ -33,15 +33,18 @@ _setprompt () {
 
 	if [ "$branch" = "HEAD" ]; then
 		local gitdir=$(git rev-parse  --git-dir)
+		local current_commit=$(git rev-parse  --short HEAD  2>/dev/null)
 		if [ -d "$gitdir/rebase-merge/" ]; then
 			# it's an interactive rebase
-			local rebase_commit=$(git rev-parse  --short HEAD)
 			local rebase_branch=$(git rev-parse  --abbrev-ref "$(cat .git/rebase-merge/head-name)")
 			branch=$rebase_branch
-			rebase=" $rebase_commit_color$rebase_commit"
-		else
+			rebase=" $rebase_commit_color$current_commit"
+		elif [ -z "$current_commit" ]; then
 			# it's a fresh repo
 			branch="INIT"
+		else
+			# detached head
+			branch=$current_commit
 		fi
 	fi
 
