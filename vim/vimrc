@@ -33,6 +33,7 @@ set indentkeys-=0#
 set number
 highlight LineNr ctermfg=0 ctermbg=0 cterm=bold
 
+" custom color scheme for PHP:
 autocmd BufRead,BufNewFile *.php colorscheme mle-php
 
 " Alt-X shortcut for external commands.
