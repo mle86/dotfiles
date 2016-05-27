@@ -36,7 +36,7 @@ _setprompt () {
 		local current_commit=$(git rev-parse  --short HEAD  2>/dev/null)
 		if [ -d "$gitdir/rebase-merge/" ]; then
 			# it's an interactive rebase
-			local rebase_branch=$(git rev-parse  --abbrev-ref "$(cat .git/rebase-merge/head-name)")
+			local rebase_branch=$(git rev-parse  --abbrev-ref "$(cat -- "$gitdir/rebase-merge/head-name")")
 			branch=$rebase_branch
 			rebase=" $rebase_commit_color$current_commit"
 		elif [ -z "$current_commit" ]; then
