@@ -40,6 +40,13 @@ autocmd BufRead,BufNewFile *.php colorscheme mle-php
 map <ESC>x  :!
 imap <ESC>x <C-O>:!
 
+" show trailing spaces as small grey circles, show nbsp as "⎵".  (⚫,⚬)
+" vim.wikia.com/wiki/Highlight_unwanted_spaces
+set list
+set listchars=tab:\ \ ,trail:⚬,nbsp:⎵
+highlight ExtraWhitespace ctermfg=237 guifg=237
+match ExtraWhitespace /\s\+$/
+
 
 """""""""""""""""""""
 
