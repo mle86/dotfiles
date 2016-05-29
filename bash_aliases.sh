@@ -51,6 +51,8 @@ alias gdc='git diff --diff-algorithm=minimal --cached'
 
 alias myip='curl https://ip.eul.cc/'
 
+alias cmhod='chmod'  # common typo
+
 tf () {
 	local file="${1:-/var/log/syslog}"
 	[ -n "$1" ] && shift
