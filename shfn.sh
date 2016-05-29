@@ -11,6 +11,8 @@ ansi_highlight='[1m'
 ansi_reset='[0m'
 ansi_promptchar='[1;4m'
 
+binfiles () { ls -1 bin/ ; }
+
 # warn message
 # Prints the message, but in the $ansi_warning color.
 warn () { echo "$ansi_warning ""$@""$ansi_reset" >&2; }
