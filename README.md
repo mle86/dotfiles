@@ -43,6 +43,19 @@ It contains small shell and Perl scripts.
 	* `g [GREPOPTION...] PATTERN      [FILENAME...]` (This will search for the *PATTERN* in the *FILENAME*s, or in *stdin*.)
 	* `g [GREPOPTION...] PATTERN... , [FILENAME...]` (This will search for any of the *PATTERN*s in the *FILENAME*s, or in *stdin*.)
 
+* **git-color-annotate:**  
+	This is a *git-annotate* variant which has colorized output.  
+	If *stdout* is a tty, this script will launch the *less* pager.
+	Syntax:
+	* `git color-annotate [ANNOTATE-OPTIONS] filename`  
+		Works like *git-annotate*, but has colorized output.
+		This mode is chosen if there are any cmdline arguments,
+		which are all passed to a real *git-annotate* child process.
+	* `git color-annotate < input`  
+		Works as colorizing filter for existing *git-annotate* output.
+		This mode is chosen if there are no cmdline arguments
+		and if *stdin* is a file or a pipe (but not a tty).
+
 * **keep-n-files:**  
 	This will remove the oldest files in *DIR* so that only *N* files remain.
 	Alternatively, it can take a list of *FILENAME*s, in which case it will delete the oldest of them until only *N* files remain.

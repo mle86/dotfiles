@@ -3,13 +3,17 @@
 use Digest::MD5 'md5_hex';
 use POSIX ':sys_wait_h';
 
-# This is a git-annotate variant which has colorized outputs.
-# It can be used like git-annotate itself, that is, "./commits.pl [ANNOTATE-OPTIONS...] filename".
-#  This mode is chosen if there are any command line arguments.
-# It can also be used as a colorizing filter for existing git-annotate output.
-#  This mode is chosen if there are no command line arguments.
-#  In this case, the script expects STDIN to be a file or a pipe, but NOT a tty.
-# If STDOUT is a tty and there was any input, this script will launch the "less" pager.
+# This is a git-annotate variant which has colorized output.
+# If stdout is a tty, this script will launch the "less" pager.
+# Syntax:
+# * git color-annotate [ANNOTATE-OPTIONS] filename
+# 	Works like git-annotate, but has colorized output.
+# 	This mode is chosen if there are any cmdline arguments,
+# 	which are all passed to a real git-annotate child process.
+# * git color-annotate < input
+# 	Works as colorizing filter for existing git-annotate output.
+# 	This mode is chosen if there are no cmdline arguments
+# 	and if stdin is a file or a pipe (but not a tty).
 
 
 ### Constants and configuration:  ##############################################
