@@ -36,5 +36,14 @@ if is_yes; then
 	fi
 fi
 
+ask_symlink "bin/ds"
+ask_symlink "bin/fn"
+ask_symlink "bin/g"
+ask_symlink "bin/keep-n-files"
+ask_symlink "bin/nocmt"
+ask_symlink "bin/params"
+ask_symlink "bin/reify"
+ask_symlink "bin/u"
+
 echo ""
 
