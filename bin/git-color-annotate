@@ -1,0 +1,242 @@
+#!/usr/bin/perl -w
+# mle 2016-05
+use Digest::MD5 'md5_hex';
+use POSIX ':sys_wait_h';
+
+# This is a git-annotate variant which has colorized outputs.
+# It can be used like git-annotate itself, that is, "./commits.pl [ANNOTATE-OPTIONS...] filename".
+#  This mode is chosen if there are any command line arguments.
+# It can also be used as a colorizing filter for existing git-annotate output.
+#  This mode is chosen if there are no command line arguments.
+#  In this case, the script expects STDIN to be a file or a pipe, but NOT a tty.
+# If STDOUT is a tty and there was any input, this script will launch the "less" pager.
+
+
+### Constants and configuration:  ##############################################
+
+use constant REMOVE_TZ => 1;  # Remove "+0200" timezone suffix?
+use constant ALIGN_AUTHORS => 1;  # Align author names? This causes output buffering until stdin closes.
+use constant REMOVE_CR => 1;  # Strip extra CR (\x0a) at line end?
+
+use constant PAGER => 'pager';
+use constant PAGER_OPTIONS => qw(--chop-long-lines --RAW-CONTROL-CHARS);
+use constant ANNOTATE => qw(git annotate);
+use constant ANNOTATE_OPTIONS => qw( );
+
+use constant SGR0 => '[0m';
+use constant LINE_SUFFIX => SGR0;  # Print reset sequence after every line -- useful if your sources actually contain ansi stuff
+
+# For all colors:
+# Use either a number 0..255 (ansi-256) or 'rrr;ggg;bbb'.
+# Prefix with '+' for bold, prefix with '/' for italics (can be combined).
+my @colors_authors = ( # Available colors for author names.
+	'255;207;207', '255;224;207', '255;243;207', '246;255;207', '221;255;207', '207;249;255', '208;207;255', '255;207;247',
+	'225;177;177', '225;194;177', '225;213;177', '216;225;177', '191;225;177', '177;225;208', '177;219;225', '178;177;225', '225;177;217',
+	15, 251, 245,
+);
+my @colors_commits = ( # Available colors for commit IDs.
+	34, 37, 39, 40, 43, 45, 83, 85, 87, 77, 79, 81, 70, 72, 74, 64, 66, 68,
+	93, 91, 89, 88, 99, 97, 95, 94, 102, 100, 111, 109, 106, 115, 113, 122, 119, 158,
+	155, 153, 150, 147, 145, 143, 142, 141, 139, 137, 136, 134, 131, 130, 128, 125, 124,
+	160, 162, 165, 166, 168, 171, 172, 174, 177, 180, 183, 184, 187, 189, 191, 226, 229,
+	220, 222, 224, 214, 217, 219, 208, 210, 202, 205, 196, 198,
+	244, 249, 253,
+);
+
+use constant COLOR_TIMESTAMP => '248';  # Timestamp color.
+use constant COLOR_LINENO    =>'+245';  # Line number color.
+
+
+### Runtime variables:  ########################################################
+
+my @input_lines  = ( );
+my @output_lines = ( );
+my $author_maxlen = 0;
+my $is_input_filter = 0;
+my %cache_commit = ( );
+my %cache_author = ( );
+
+
+### Helper functions:  #########################################################
+
+sub find_commit_color ($) {
+	my ($commit_id) = @_;
+	if (!defined $cache_commit{ $commit_id }) {
+		my $n_colors = $#colors_commits + 1;
+		$cache_commit{ $commit_id } = $colors_commits[ (hex substr $commit_id, -8) % $n_colors ];
+	}
+
+	return wantarray
+		? ($cache_commit{$commit_id}, $commit_id)
+		:  $cache_commit{$commit_id}
+}
+
+sub find_author_color ($) {
+	my ($author) = @_;
+	if (!defined $cache_author{ $author }) {
+		my $n_colors = $#colors_authors + 1;
+		my $author_hash = md5_hex($author);
+		$cache_author{ $author } = $colors_authors[ (hex substr $author_hash, -7) % $n_colors ];
+	}
+	return wantarray
+		? ($cache_author{$author}, $author)
+		:  $cache_author{$author}
+}
+
+sub colorize {
+	my ($color, $text, $bold) = @_;
+
+	my $prefix = '0';
+	if ($color =~ m/^([\+-\/]*)(.+)$/) {
+		local $_ = $1;
+		$color = $2;
+		$prefix .= ';1'  if m#\+#;
+		$prefix .= ';3'  if m#\/#;
+	}
+
+	if ($color =~ m/^\d+;\d+;\d+$/) {
+		# rgb
+		$color = "[${prefix};38;2;${color}m"
+	} elsif ($color >= 0 && $color <= 255) {
+		# ansi-256
+		$color = "[${prefix};38;5;${color}m"
+	}
+
+	return "${color}${text}" . SGR0
+}
+
+sub next_input_line () {
+	($is_input_filter)
+		? <STDIN>  # work as input filter
+		: shift @input_lines  # work on git-annotate output in var
+}
+
+sub output_line ($) {
+	my ($line) = @_;
+
+	my $author_indent = ($author_maxlen > 0)
+		? (' ' x ($author_maxlen - length $line->{'author_raw'}))
+		: '';
+
+	print	$author_indent . $line->{'author'} .
+		" " . $line->{'timestamp'} .
+		" " . $line->{'commit'} .
+		" " . $line->{'lineno'} .
+		" " . $line->{'line'} .
+		LINE_SUFFIX . "\n"
+}
+
+
+### Input mode selection:  #####################################################
+
+if (@ARGV) {
+	# There are command line arguments --
+	# that means we'll have to start git-annotate with those arguments and use its output in the main loop.
+	# qx// is unsafe, so we'll use exec() in a child process,
+	my $pid = open STDIN, '-|';
+	if (!defined $pid) {
+		die "fork failed: $!"
+	} elsif ($pid == 0) {
+		# background child process, stdout is connected to parent's stdin.
+		# launch git-annotate:
+		exec ANNOTATE, ANNOTATE_OPTIONS, @ARGV;
+		die "could not run " . ANNOTATE . ": $!"
+	}
+
+	@input_lines = <STDIN>;
+	waitpid $pid, WNOHANG;
+	# No need to restore the original stdin, we don't need it.
+
+	if (!@input_lines) {
+		# No stdout output at all?
+		# Probably an error which is visible via stderr.
+		exit 1
+	} elsif ($#input_lines == 0 && $input_lines[0] =~ m/^$/m) {
+		# In some error cases, git-annotate prints one empty line (!), plus stderr output.
+		# Since it would be useless to call "less" for one empty line, we'll exit right here.
+		exit 1
+	}
+
+} else {
+	# There are no command line arguments -- that means someone wants to use us as a filter for git-annotate input.
+	# It can be read either from a pipe (non-tty) or from a file redirection.
+	# In any case, STDIN is already set up correctly.
+	
+	if (-p STDIN) {
+		# Ok, will read from a pipe
+	} elsif (-t STDIN) {
+		# Won't read from a tty.
+		# Probably someone called this script manually and forgot the filename.
+		# Let git-annotate tell the story through its own error message:
+		exec ANNOTATE;
+		die "could not run " . ANNOTATE . ": $!"
+	} elsif (eof STDIN) {
+		# Nothing to do here (empty input file or closed stdin)
+		exit;
+	} elsif (-f STDIN) {
+		# Ok, will read from a plain file
+	} else {
+		# wtf
+		die "stdin is not readable"
+	}
+
+	$is_input_filter = 1  # used by next_input_line()
+}
+
+if (-t STDOUT) {
+	# STDOUT is a tty -- fork and replace self with "less".
+	# If it's not, then we just print our colorized output directly
+	# and let the user handle paging/redirection themselves.
+
+	my $pid = open STDIN, '-|';
+	if (!defined $pid) {
+		die "fork failed: $!"
+	} elsif ($pid > 0) {
+		# Foreground process, stdin is now connected to child's stdout.
+		# exec less:
+		exec PAGER, PAGER_OPTIONS;
+		die "could not run " . PAGER . ": $!"
+	} else {
+		# Child process, stdin is still the "real" stdin, stdout is connected to less' stdin.
+		# continue as usual...
+	}
+}
+
+
+### Main input loop:  ##########################################################
+
+my $re_commitid = '[0-9a-f]+';
+my $re_tz = '\+\d{1,4}';
+my $re_time = '\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(?: '.$re_tz.')?';
+
+while (defined($_ = next_input_line)) {
+	m/^\s*($re_commitid)\s+\(\s*(\S.*?)\s+($re_time)\s*(\d+)\)(.*)$/io
+		or print and next;
+
+	my ($commit_id, $author, $timestamp, $lineno, $line) = ($1, $2, $3, $4, $5);
+
+	$timestamp = $1  if (REMOVE_TZ && ($timestamp =~ m/^(.+?)\s+$re_tz$/));
+	$lineno = sprintf '% 4d', $lineno;
+	$line =~ s/\r+$//  if REMOVE_CR;
+
+	my $output_data = {
+		author_raw	=> $author,
+		author		=> colorize(find_author_color $author),
+		timestamp	=> colorize(COLOR_TIMESTAMP, $timestamp),
+		commit		=> colorize(find_commit_color $commit_id),
+		lineno		=> colorize(COLOR_LINENO, $lineno),
+		line		=> $line,
+	};
+
+	if (ALIGN_AUTHORS) {
+		$author_maxlen = length $author  if $author_maxlen < length $author;
+		push @output_lines, $output_data
+	} else {
+		output_line($output_data)
+	}
+
+}
+
+# If there are any buffered output lines, print them now:
+output_line($_) foreach @output_lines;
+

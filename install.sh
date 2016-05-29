@@ -27,5 +27,14 @@ while true; do
 	elif is_no; then break; fi
 done
 
+ask_symlink "bin/git-color-annotate"
+if is_yes; then
+	ask "Git-Aliases $(hi ann) und $(hi annot) für color-annotate anlegen? [Y/n]"  'y' 1
+	if is_yes; then
+		git config -f $HOME/.gitconfig-extra alias.ann   color-annotate
+		git config -f $HOME/.gitconfig-extra alias.annot color-annotate
+	fi
+fi
+
 echo ""
 
