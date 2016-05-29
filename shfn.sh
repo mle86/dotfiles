@@ -19,6 +19,14 @@ warn () { echo "$ansi_warning ""$@""$ansi_reset" >&2; }
 # Prints the message, but in the $ansi_good color.
 good () { echo "$ansi_good ""$@""$ansi_reset" ; }
 
+# hi word...
+# Prints its arguments, but prefixed with the highlighting ansi sequence.
+hi () { echo "$ansi_highlight""$@""$ansi_reset" ; }
+
+# pc word...
+# Prints its arguments, but prefixed with the "prompt option character" ansi sequence.
+pc () { echo "$ansi_promptchar""$@""$ansi_reset" ; }
+
 # z command [arguments...]
 # Runs the command as if there had been no 'z' prefix at all,
 # but prints the $ansi_dark sequence first and the $ansi_reset sequence afterwards.
@@ -97,7 +105,7 @@ ask_symlink () {
 
 	[ "$defaultAnswer" = "y" ] && local options='[Y/n]' || local options='[y/N]'
 
-	ask "Symlink $ansi_highlight$showSysFilename$ansi_reset → $pkgFilename? $options" "$defaultAnswer"
+	ask "Symlink $(hi $showSysFilename) → $pkgFilename? $options" "$defaultAnswer"
 
 	is_yes && install_symlink "$sysFilename" "$pkgFilename"  || true
 }
@@ -152,12 +160,7 @@ resolve_existing_symlink_target () {
 	fi
 
 	while true; do
-		ask \
-"${ansi_promptchar}s${ansi_reset}how original / "\
-"${ansi_promptchar}d${ansi_reset}iff / "\
-"${ansi_promptchar}y${ansi_reset}es, replace! / "\
-"${ansi_promptchar}n${ansi_reset}o, skip "\
-"[s/d/y/N]"  'n' 1
+		ask "$(pc s)how original / $(pc d)iff / $(pc y)es, replace! / $(pc n)o, skip [s/d/y/N]"  'n' 1
 		if   is S;   then showfile "$sysFilename"
 		elif is D;   then showdiff "$sysFilename" "$pkgFilename"
 		elif is_yes; then true ; return
@@ -173,7 +176,7 @@ showfile () {
 	if [ -f "$filename" ] && [ ! -s "$filename" ]; then
 		good "Originaldatei $filename ist leer!"
 	else
-		echo " Zeige Originaldatei $ansi_highlight$filename$ansi_reset:"
+		echo " Zeige Originaldatei $(hi $filename):"
 		echo " "
 		cat -- "$filename"  || true
 		echo " "
