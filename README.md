@@ -6,6 +6,12 @@ and every prompt default is 'no',
 so it's safe to run the installation script and hit Enter a few times
 just to see what it would do.
 
+If you just want to copy the `bin/` scripts
+to `/usr/local/bin/`,
+run *root-install.sh*.
+It will ask about every bin/ script file,
+always defaulting to 'no'.
+
 
 ## bin/
 
