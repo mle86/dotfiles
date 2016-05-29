@@ -21,7 +21,7 @@ It contains small shell and Perl scripts.
 * **g:**  
 	An abbreviation for "*grep --line-number --with-filename --ignore-case --color=always*".
 	Also, it allows for simple entry of multiple grep patterns.
-	Since it is just a *grep* wrapper, it will match *stdin* if no *FILENAME*s are given (or if one of them is *-*).  
+	Since it is just a *grep* wrapper, it will match *stdin* if no *FILENAME*s are given (or if one of them is `-`).  
 	Syntax:
 	* `g [GREPOPTION...] PATTERN      [FILENAME...]` (This will search for the *PATTERN* in the *FILENAME*s, or in *stdin*.)
 	* `g [GREPOPTION...] PATTERN... , [FILENAME...]` (This will search for any of the *PATTERN*s in the *FILENAME*s, or in *stdin*.)
