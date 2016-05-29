@@ -23,3 +23,6 @@ default = simple
 [credential]
 helper = cache
 
+[include]
+path = .gitconfig-extra
+
