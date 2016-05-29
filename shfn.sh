@@ -43,6 +43,7 @@ findcmd () {
 	local first="$1"
 	while [ $# -gt 0 ]; do case "$1" in
 		echo|mv|ln|cp|rm)  echo "$1" ; return ;;
+		git)               echo "$1 $2" ; return ;;
 		*)  shift ;;
 	esac done
 	echo "$first"
