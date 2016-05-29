@@ -158,12 +158,10 @@ resolve_existing_symlink_target () {
 "${ansi_promptchar}y${ansi_reset}es, replace! / "\
 "${ansi_promptchar}n${ansi_reset}o, skip "\
 "[s/d/y/N]"  'n' 1
-		case "$ANSWER" in
-			s|S) showfile "$sysFilename" ;;
-			d|D) showdiff "$sysFilename" "$pkgFilename" ;;
-			y|Y|j|J|yes) true; return ;;
-			n|N)         false; return ;;
-		esac
+		if   is S;   then showfile "$sysFilename"
+		elif is D;   then showdiff "$sysFilename" "$pkgFilename"
+		elif is_yes; then true ; return
+		elif is_no;  then false ; return ; fi
 	done
 }
 

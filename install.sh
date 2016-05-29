@@ -14,11 +14,9 @@ while true; do
 "${ansi_promptchar}b${ansi_reset}lueprompt.sh / "\
 "kei${ansi_promptchar}n${ansi_reset}er "\
 "[g/b/N]" 'n'
-	case "$ANSWER" in
-		g|G)	install_symlink ".prompt" "prompt/gitprompt.sh"  ; break ;;
-		b|B)	install_symlink ".prompt" "prompt/blueprompt.sh" ; break ;;
-		n|N)	break ;;
-	esac
+	if   is G;  then install_symlink ".prompt" "prompt/gitprompt.sh"  ; break
+	elif is B;  then install_symlink ".prompt" "prompt/blueprompt.sh" ; break
+	elif is_no; then break ; fi
 done
 
 ask_symlink ".vimrc" "vim/vimrc"
@@ -29,11 +27,8 @@ while true; do
 		mkdir -p $HOME/.vim/colors/
 		find $HERE/vim/colors/ -type f -print0  | z xargs -0r  ln -vsft $HOME/.vim/colors/ --
 		break
-	elif is_no; then
-		break
-	elif is L; then
-		ls -1Alh $HERE/vim/colors/
-	fi
+	elif is L;  then ls -1Alh $HERE/vim/colors/
+	elif is_no; then break; fi
 done
 
 echo ""
