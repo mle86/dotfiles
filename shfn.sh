@@ -113,10 +113,27 @@ ask_symlink () {
 	is_yes && install_symlink "$sysFilename" "$pkgFilename"  || true
 }
 
+# ask_copy sysFilename [pkgFilename=sysFilename [defaultAnswer=n]]
+# Asks whether a file in the repo (pkgFilename, relative path only)
+# should be copied to its sysFilename location (absolute path only).
+# See install_copy() for the copying and conflict resolution details.
+# defaultAnswer must by "y" or "n".
+ask_copy () {
+	local sysFilename="$1"
+	local pkgFilename="${2:-$sysFilename}"
+	local defaultAnswer="${3:-n}"
+
+	[ "$defaultAnswer" = "y" ] && local options='[Y/n]' || local options='[y/N]'
+
+	ask "Installiere $(hi $sysFilename) ← $pkgFilename? $options" "$defaultAnswer"
+
+	is_yes && install_copy "$sysFilename" "$pkgFilename"  || true
+}
+
 # install_symlink sysFilename pkgFilename
 # Tries to create a symlink (sysFilename, absolute or $HOME-relative path)
 # pointing to pkgFilename (package-relative path).
-# If the symlink filename already exists, resolve_existing_symlink_target() will be called
+# If the symlink filename already exists, resolve_existing_target() will be called
 # to ask the user how the conflict should be resolved,
 # possibly skipping the symlinking.
 install_symlink () {
@@ -126,7 +143,7 @@ install_symlink () {
 	is_absolute_path "$sysFilename"  || sysFilename="$HOME/$sysFilename"
 
 	if [ -e "$sysFilename" ] || [ -L "$sysFilename" ]; then
-		if resolve_existing_symlink_target "$sysFilename" "$pkgFilename"; then
+		if resolve_existing_target "$sysFilename" "$pkgFilename"; then
 			# remove existing target, but make a backup
 			z mv -vf -- "$sysFilename" "${sysFilename}.orig"
 		else
@@ -138,12 +155,40 @@ install_symlink () {
 	z ln -sv -- "$pkgFilename" "$sysFilename"
 }
 
-# resolve_existing_symlink_target sysFilename pkgFilename
-# Asks the user how a symlinking conflict should be resolved,
+# install_copy sysFilename pkgFilename
+# Tries to copy pkgFilename (package-relative path) to sysFilename (absolute path).
+# If the target filename already exists, resolve_existing_target() will be called
+# to ask the user how the conflict should be resolved,
+# possibly skipping the copying.
+install_copy () {
+	local sysFilename="$1"
+	local pkgFilename="$HERE/$2"
+
+	if ! is_absolute_path "$sysFilename" || [ -d "$sysFilename" ]; then
+		warn "install_symlink() needs an absolute path"
+		exit 9
+	fi
+
+	if [ -e "$sysFilename" ] || [ -L "$sysFilename" ]; then
+		if resolve_existing_target "$sysFilename" "$pkgFilename"; then
+			# remove existing target, but make a backup
+			z mv -vf -- "$sysFilename" "${sysFilename}.orig"
+			chmod -x "${sysFilename}.orig"
+		else
+			# don't overwrite
+			true ; return
+		fi
+	fi
+
+	z cp -v --remove-destination -- "$pkgFilename" "$sysFilename"
+}
+
+# resolve_existing_target sysFilename pkgFilename
+# Asks the user how a symlinking/copying conflict should be resolved,
 # assuming that the symlink name sysFilename already exists.
-# Returns true if the user wants to overwrite the existing file with the symlink;
+# Returns true if the user wants to overwrite the existing file;
 # returns false if the user wants to keep the existing sysFilename file unchanged.
-resolve_existing_symlink_target () {
+resolve_existing_target () {
 	local sysFilename="$1"
 	local pkgFilename="$2"
 
