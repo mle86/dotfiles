@@ -83,14 +83,14 @@ ask () {
 	true
 }
 
-# ask_symlink sysFilename pkgFilename [defaultAnswer=n]
+# ask_symlink sysFilename [pkgFilename=sysFilename [defaultAnswer=n]]
 # Asks whether a symlink (sysFilename, absolute or $HOME-relative) should be created,
 # pointing to a file in the package directory (pkgFilename, relative path only).
 # See install_symlink() for the link creation and conflict resolution details.
 # defaultAnswer must be "y" or "n".
 ask_symlink () {
 	local sysFilename="$1"
-	local pkgFilename="$2"
+	local pkgFilename="${2:-$sysFilename}"
 	local defaultAnswer="${3:-n}"
 
 	is_absolute_path "$sysFilename"  && local showSysFilename="$sysFilename"  || local showSysFilename="~/$sysFilename"
