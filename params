@@ -1,0 +1,17 @@
+#!/bin/sh
+# mle 2014-08
+
+# Prints all its command line arguments.
+# The arguments are all enclosed in highlighted square brackets
+# to avoid spacing ambiguity.
+
+M1="[1;36m"
+M0="[0m"
+
+n=0
+while [ $# -gt 0 ]; do
+	n=$((n + 1))
+	echo "${M1}${n} [${M0}$1${M1}]${M0}"
+	shift
+done
+

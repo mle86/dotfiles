@@ -1,0 +1,40 @@
+#!/bin/sh
+# mle 2016-05
+set -e
+PROGNAME=$(basename -- "$0")
+
+use_id=yes
+if [ "$1" = "-n" ]; then
+	use_id=
+	shift
+fi
+
+if [ -z "$1" ]; then
+	echo "syntax: $PROGNAME [-n] UID"					>&2
+	echo ""									>&2
+	echo "Resolves a username by user id."					>&2
+	echo "Usually, \`id' is then called for the resulting username."	>&2
+	echo "This can be suppressed with the -n option,"			>&2
+	echo "in which case only the username will be printed."			>&2
+	echo ""									>&2
+	exit
+fi
+
+status=0
+entline=$(getent passwd -- "$1") || status=$?
+if [ $status -eq 2 ]; then
+	echo "$PROGNAME: $1: no such user" >&2
+	exit $status
+elif [ $status -ne 0 ]; then
+	echo "$PROGNAME: $1: getent failed" >&2
+	exit $status
+fi
+
+username=$(echo "$entline" | cut -d':' -f1)
+
+if [ -n "$use_id" ]; then
+	id -- "$username"
+else
+	echo "$username"
+fi
+

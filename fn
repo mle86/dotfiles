@@ -1,0 +1,62 @@
+#!/bin/sh 
+# mle 2014-01
+PROGNAME=$(basename -- "$0")
+
+FIND=/usr/bin/find
+SEPARATOR=','
+FINDPATH='.'
+
+syntax () {
+	echo "Syntax: $PROGNAME [-i] PATTERN... [, FINDOPTS...]" >&2
+	exit 1
+}
+
+f_joinop='-or'
+
+f_nameop='-name'
+if [ "$1" = "-i" ]; then
+	f_nameop='-iname'
+	shift
+fi
+
+[ $# -gt 0 ] || syntax
+
+# Read filename patterns:
+patterns=
+join=
+p=0
+while [ $# -gt 0 ]; do
+	if [ "$1" = "$SEPARATOR" ]; then
+		# Stop, the rest of the arguments are regular find options,
+		# we can just use them as "$@"
+
+		[ $p -gt 0 ] || syntax  # syntax error, no patterns present
+
+		shift
+		break
+	fi
+
+	# Store the pattern arg in $patternN for now.
+	# This evades quoting problems and works fine for more than 9 arguments too.
+	eval "pattern${p}=\$1"
+	shift
+
+	# add "-name $patternN" template
+	patterns="$patterns $join $f_nameop \"\$pattern${p}\""
+
+	join="$f_joinop"
+	p=$((p + 1))
+done
+
+# If the command line had additional FINDOPTS, they are in $@ now,
+# so we need no special handling for them.
+
+# Build the command template:
+findcmd="\$FIND \$findpath '(' $patterns ')' \"\$@\""
+
+# Now $findcmd is a command template, i.e. it contains a lot of quotes and escaped $variables.
+# A simple eval will correctly evaluate it to the find command
+# with appropriately-quoted arguments:
+
+eval exec $findcmd
+

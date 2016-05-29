@@ -1,0 +1,8 @@
+#!/bin/sh
+# mle 2014-11
+
+# Remove hash comment lines and empty lines from input.
+# May receive one or more filenames as parameter(s) as well as additional grep options.
+
+exec grep --no-filename '^\s*[^#]' "$@"
+
