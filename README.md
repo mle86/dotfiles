@@ -1,3 +1,14 @@
+This is my personal dotfiles repository.
+
+Run *install.sh* to start the installation process.
+Every installation step needs manual confirmation
+and every prompt default is 'no',
+so it's safe to run the installation script and hit Enter a few times
+just to see what it would do.
+
+
+## bin/
+
 This is my `~/bin/` directory.
 It contains small shell and Perl scripts.
 
