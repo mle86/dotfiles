@@ -248,7 +248,7 @@ showdiff () {
 		echo -n "$diffResult"
 		echo " "
 	else
-		echo " ${ansi_good}Dateien sind identisch!${ansi_reset}"
+		good "Dateien sind identisch!"
 	fi
 }
 
