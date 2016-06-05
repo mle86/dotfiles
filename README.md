@@ -103,3 +103,41 @@ It contains small shell and Perl scripts.
 	The *-n* option causes *u* just to print the username
 	instead of calling the *id* program with it.
 
+
+## Some less-boring aliases and functions in .bash_aliases
+
+* **keep:** `IGNOREEOF=99`  
+	This causes the bash shell to ignore to Ctrl-D logouts.
+
+* **c99:** `gcc -O -std=c99 -Wall -Wextra -pedantic`
+
+* **ga:** `git add -p`
+* **gd:** `git diff --diff-algorithm=minimal`
+* **gdc:** `git diff --diff-algorithm=minimal --cached`
+
+* **tf:**
+	A `tail -n0 -f` abbreviation.  
+	Syntax: `tf [LOGFILE=/var/log/syslog]...`
+
+* **todo:**
+	Greps all files in the current directory for 'TODO'.
+	Greps all files in other directories instead if there are any arguments.
+	Also greps all plain files which are given as arguments.  
+	Syntax: `todo [TARGET=.]...`
+
+* **grepf:**
+	A combination of `find -name` and `grep`.
+	Uses the *~/bin/g* script.  
+	Syntax: `grepf FILEPATTERN [GREP-OPTIONS...] GREP-PATTERNS...`  
+	Example: `grepf '*.php' '<? '` to find all usages of the obsolete short opening tag.
+
+* **dx:**
+	A `docker exec` shortcut.
+	Without any arguments, it lists the currently-running containers (`docker ps`).  
+	Syntax: `dx CONTAINERNAME [COMMAND=$SHELL]`
+
+* **T:**
+	Creates a new file from a template in *~/.templates/* and opens it with vim.
+	(If a file with the same name already exists, it won't be overwritten.)  
+	Syntax: `T [FILENAME=test.sh]`
+

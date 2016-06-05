@@ -73,7 +73,7 @@ lastpow () {
 todo () {
 	# Syntax:  todo [TARGET=.]...
 	# Greps all files in the current directory for 'TODO'.
-	# Greps all files in different directories instead if there are any arguments.
+	# Greps all files in other directories instead if there are any arguments.
 	# Also greps all plain files which are given as arguments.
 
 	local grepopt='--color=always -i -n'
@@ -135,7 +135,7 @@ dx () {
 }
 
 # T [filename=test.sh]
-#  Creates a simple template file for quick tests, then opens it.
+#  Creates a new file from a template, then opens it.
 #  Existing files will simply be opened, not overwritten.
 T () {
 	local default_name='test'
