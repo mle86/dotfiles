@@ -89,7 +89,12 @@ ask () {
 		echo -n " $ps "
 	fi
 
-	read -p "${prompt} ${ansi_prompt_symbol}>${ansi_reset} " ANSWER
+	if ! read -p "${prompt} ${ansi_prompt_symbol}>${ansi_reset} " ANSWER; then
+		# eof
+		echo ""
+		return 1
+	fi
+
 	[ -z "$ANSWER" ] && ANSWER=$default
 	true
 }
