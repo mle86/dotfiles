@@ -134,6 +134,47 @@ dx () {
 	IFS="$oldifs"
 }
 
+# T [filename=test.sh]
+#  Creates a simple template file for quick tests, then opens it.
+#  Existing files will simply be opened, not overwritten.
+T () {
+	local default_name='test'
+	local default_extension='.sh'
+	local filename="${1:-"$default_name$default_extension"}"
+	local goline=2
+	local vimcmd=
+
+	# Short cut: .sh gets expanded to test.sh
+	echo "$filename" | grep -q '^\.[[:alnum:]]\+$' && filename="$default_name$filename"
+
+	if [ -e "$filename" ]; then
+		echo "File $filename already exists!"  >&2
+		# Don't overwrite it!
+		# Just open it.
+		vim -- "$filename"
+		return
+	fi
+
+	local extension="${filename##*.}"
+	local template="$HOME/.templates/template.$extension"
+	local vimscript="$HOME/.templates/${extension}.vim"
+
+	local cmd_vimscript=
+	[ -f "$vimscript" ] && cmd_vimscript="-S $vimscript"  # make sure none of these filenames contains a space
+
+	if [ -f "$template" ]; then
+		# :1r pastes the file _below_ the current line.
+		# That means the empty default line is still at the top of the buffer afterwards.
+		# :0d deletes it.
+		# After that, +$goline moves the cursor.
+		# Additional template-specific vim commands are read from $vimscript (if it exists).
+
+		vim -c ":1r $template" -c ':0d' +$goline $cmd_vimscript -- "$filename"
+	else
+		vim $cmd_vimscript -- "$filename"
+	fi
+}
+
 
 ###  Farben:  ####################################################
 
