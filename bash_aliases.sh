@@ -54,20 +54,18 @@ alias myip='curl https://ip.eul.cc/'
 alias cmhod='chmod'  # common typo
 
 tf () {
-	local file="${1:-/var/log/syslog}"
-	[ -n "$1" ] && shift
-	tail -n0 -f "$@" "$file"
+	[ -n "$1" ] || set -- '/var/log/syslog'
+	tail -n0 -f "$@"
 }
 
 lastpow () {
-	local file="${1:-/var/log/auth.log}"
-	[ -n "$1" ] && shift
+	[ -n "$1" ] || set -- '/var/log/auth.log'
 	zgrep \
 		-e 'New seat seat0.'		\
 		-e 'System is powering down.'	\
 		-e 'Lid opened.'		\
 		-e 'Lid closed.'		\
-		-a "$@" "$file"
+		-a "$@"
 }
 
 todo () {
@@ -79,10 +77,9 @@ todo () {
 	local grepopt='--color=always -i -n'
 	local grepre='\bTODOs\?\b'
 
-	local target1="${1:-"."}"
-	[ -n "$1" ] && shift
+	[ -n "$1" ] || set -- '.'
 
-	find "$target1" "$@" -maxdepth 1 -type f -print0	| \
+	find "$@" -maxdepth 1 -type f -print0	| \
 	  xargs -0r grep $grepopt -- "$grepre"			| \
 	    less -FRX
 }
@@ -116,22 +113,17 @@ dx () {
 		return 9
 	fi
 
-	local oldifs="$IFS"
-	IFS="	"
-
 	local container="$1"
 	shift
 
 	# This will print an error and exit if the container is not found:
 	docker inspect "$container" >/dev/null || return
 
-	local command="${@:-"$SHELL"}"
-	local showcommand=$(echo $command)  # remove tabs
+	[ -n "$1" ] || set -- "$SHELL"
 
-	echo "[1mEntering docker container '$container' with command '$showcommand':[0m"  >&2
+	echo "[1mEntering docker container '$container' with command '$@':[0m"  >&2
 
-	docker exec -t -i "$container" $command
-	IFS="$oldifs"
+	docker exec -t -i "$container" "$@"
 }
 
 # T [filename=test.sh]
