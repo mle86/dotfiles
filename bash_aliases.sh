@@ -95,8 +95,9 @@ grepf () {
 		return 1
 	fi
 
-	filepattern="${1:-"*"}"
+	local filepattern="${1:-"*"}"
 	shift
+
 	find -type f -name "$filepattern" -print0 | xargs -0r g "$@" , 
 }
 
