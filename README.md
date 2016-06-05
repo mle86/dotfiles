@@ -1,7 +1,14 @@
 This is my personal dotfiles repository.
 
+
+## Installation
+
+```sh
+cd ~  && git clone https://github.com/mle86/dotfiles .dotfiles/  && .dotfiles/install.sh
+```
+
 Run *install.sh* to start the installation process.
-Every installation step needs manual confirmation
+Every installation step asks for manual confirmation
 and every prompt default is 'no',
 so it's safe to run the installation script and hit Enter a few times
 just to see what it would do.
