@@ -26,7 +26,7 @@ This is my `~/bin/` directory.
 It contains small shell and Perl scripts.
 
 * **ds:**  
-	This is a glorified variant of "*du -sh * | sort --human-numeric-sort*".
+	This is a prettier variant of "*du -sh * | sort*".
 	All it does is list the current directory's contents, summarize their sizes, and sort by size (smallest first).
 	Also, the K/M/G/T suffixes are will be colored differently,
 	indentation will line up nicely,
@@ -45,7 +45,7 @@ It contains small shell and Perl scripts.
 * **g:**  
 	An abbreviation for "*grep --line-number --with-filename --ignore-case --color=always*".
 	Also, it allows for simple entry of multiple grep patterns.
-	Since it is just a *grep* wrapper, it will match *stdin* if no *FILENAME*s are given (or if one of them is `-`).  
+	Since it is just a *grep* wrapper, it will read *stdin* if no *FILENAME*s are given (or if one of them is `-`).  
 	Syntax:
 	* `g [GREPOPTION...] PATTERN      [FILENAME...]` (This will search for the *PATTERN* in the *FILENAME*s, or in *stdin*.)
 	* `g [GREPOPTION...] PATTERN... , [FILENAME...]` (This will search for any of the *PATTERN*s in the *FILENAME*s, or in *stdin*.)
@@ -75,7 +75,7 @@ It contains small shell and Perl scripts.
 	A simple *grep* abbreviation to filter shell scripts and similar files:
 	It will remove all empty lines, all whitespace-only lines,
 	and all lines whose first non-whitespace symbol is a hash (*#*).
-	Like grep, it can take one or multiple filenames, or it'll simply filter *stdin*.  
+	Like grep, it can take one or multiple filenames, or it'll simply read *stdin*.  
 	Syntax: `nocmt [FILENAME...]`
 
 * **params:**  
@@ -107,37 +107,35 @@ It contains small shell and Perl scripts.
 ## Some less-boring aliases and functions in .bash_aliases
 
 * **keep:** `IGNOREEOF=99`  
-	This causes the bash shell to ignore to Ctrl-D logouts.
-
+	This causes the bash shell to ignore Ctrl-D logouts.
 * **c99:** `gcc -O -std=c99 -Wall -Wextra -pedantic`
-
 * **ga:** `git add -p`
 * **gd:** `git diff --diff-algorithm=minimal`
 * **gdc:** `git diff --diff-algorithm=minimal --cached`
 
 * **tf:**
-	A `tail -n0 -f` abbreviation.  
+	A *tail -n0 -f* abbreviation.  
 	Syntax: `tf [LOGFILE=/var/log/syslog]...`
 
 * **todo:**
 	Greps all files in the current directory for 'TODO'.
-	Greps all files in other directories instead if there are any arguments.
+	Greps in other directories instead if there are any directory arguments.
 	Also greps all plain files which are given as arguments.  
 	Syntax: `todo [TARGET=.]...`
 
 * **grepf:**
-	A combination of `find -name` and `grep`.
+	A combination of *find -name* and *grep*.
 	Uses the *~/bin/g* script.  
-	Syntax: `grepf FILEPATTERN [GREP-OPTIONS...] GREP-PATTERNS...`  
+	Syntax: `grepf FILEPATTERN [GREPOPTIONS...] GREPPATTERNS...`  
 	Example: `grepf '*.php' '<? '` to find all usages of the obsolete short opening tag.
 
 * **dx:**
-	A `docker exec` shortcut.
-	Without any arguments, it lists the currently-running containers (`docker ps`).  
+	A *docker exec* shortcut.  
+	(Without any arguments, it lists the currently-running containers (`docker ps`).)  
 	Syntax: `dx CONTAINERNAME [COMMAND=$SHELL]`
 
 * **T:**
-	Creates a new file from a template in *~/.templates/* and opens it with vim.
-	(If a file with the same name already exists, it won't be overwritten.)  
+	Creates a new file from a template in *~/.templates/*, then opens it with vim.  
+	Existing files will simply be opened, not overwritten.  
 	Syntax: `T [FILENAME=test.sh]`
 

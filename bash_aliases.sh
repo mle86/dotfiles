@@ -71,7 +71,7 @@ lastpow () {
 todo () {
 	# Syntax:  todo [TARGET=.]...
 	# Greps all files in the current directory for 'TODO'.
-	# Greps all files in other directories instead if there are any arguments.
+	# Greps in other directories instead if there are any directory arguments.
 	# Also greps all plain files which are given as arguments.
 
 	local grepopt='--color=always -i -n'
@@ -91,7 +91,7 @@ sdl () {
 grepf () {
 	if [ -z "$2" ]; then
 		echo "Syntax:" >&2
-		echo " grepf FILEPATTERN [GREP-OPTIONS...] GREP-PATTERNS..." >&2
+		echo " grepf FILEPATTERN [GREPOPTIONS...] GREPPATTERNS..." >&2
 		return 1
 	fi
 
@@ -128,7 +128,7 @@ dx () {
 }
 
 # T [filename=test.sh]
-#  Creates a new file from a template, then opens it.
+#  Creates a new file from a template in ~/.templates/, then opens it with vim.
 #  Existing files will simply be opened, not overwritten.
 T () {
 	local default_name='test'
