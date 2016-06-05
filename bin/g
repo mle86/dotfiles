@@ -3,45 +3,82 @@
 set -e
 PROGNAME=$(basename -- "$0")
 
-# g pattern filename...
+# g pattern      filename...
 # g pattern... , filename...
 
 SEPARATOR=','
 PATTERNOPT='-e'
-options="-nHi	--color=always"
-filenames=
-patterns=
+grepoptions="-nHi --color=always"
+greppatterns=
 
-if [ -z "$1" ]; then
+syntax () {
 	echo "Syntax:" >&2
 	echo " $PROGNAME [OPTION...] PATTERN      [FILENAME...]" >&2
 	echo " $PROGNAME [OPTION...] PATTERN... $SEPARATOR [FILENAME...]" >&2
-	exit 1
-fi
+	exit ${1:-1}
+}
 
-export IFS="	
-"  # tab only
+no_patterns () {
+	echo "No search patterns."  >&2
+	syntax
+}
 
-while [ ! -z "$1" ]; do
-	if [ "-${1#"-"}" = "$1" ]; then
-		# it's an option:
-		options="$options	$1"
-	elif [ "$1" = "$SEPARATOR" ]; then
-		# those were multiple patterns.
-		# only filenames follow:
-		for p in $filenames; do
-			patterns="$patterns	$PATTERNOPT	$p"
-		done
-		filenames=
+find_sep_arg () {
+	while [ $# -gt 0 ]; do
+		[ "$1" = "$SEPARATOR" ] && return 0
 		shift
-		break
-	elif [ -z "$patterns" ]; then
-		patterns="$PATTERNOPT	$1"
-	else
-		filenames="$filenames	$1"
-	fi
+	done
+	return 1
+}
+
+has_dash () { [ "-${1#"-"}" = "$1" ]; }
+
+################################################################################
+
+
+[ -n "$1" ] || syntax
+
+# Read all arguments starting with a dash.
+# Those are all grep options.
+o=0
+while [ $# -gt 0 ] && has_dash "$1"; do
+	eval "gopt${o}=\$1"
+	grepoptions="$grepoptions \"\$gopt${o}\""
+
+	o=$((o + 1))
 	shift
 done
 
-exec grep $options $patterns $filenames "$@"
+
+if ! find_sep_arg "$@"; then
+	# No separator argument present --
+	# the first non-dash arg is the pattern,
+	# the rest are filenames.
+
+	[ $# -gt 0 ] || no_patterns
+
+	pattern="$1"
+	greppatterns="$PATTERNOPT \"\$pattern\""
+
+else
+	# There is a separator argument.
+	# That means the first non-dash arg is the first pattern,
+	# the rest up until the separator argument are additional patterns,
+	# the rest are filenames.
+
+	p=0
+	while [ $# -gt 0 ] && [ "$1" != "$SEPARATOR" ]; do
+		eval "pattern${p}=\$1"
+		greppatterns="$greppatterns $PATTERNOPT \"\$pattern${p}\""
+
+		p=$((p + 1))
+		shift
+	done
+
+	[ $p -gt 0 ] || no_patterns
+fi
+
+shift  # Now $1 is the first filename argument (if there are any left).
+
+eval "exec grep $grepoptions $greppatterns -- \"\$@\""
 
