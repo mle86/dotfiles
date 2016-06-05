@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh
 # mle 2014-01
 PROGNAME=$(basename -- "$0")
 
@@ -52,7 +52,7 @@ done
 # so we need no special handling for them.
 
 # Build the command template:
-findcmd="\$FIND \$findpath '(' $patterns ')' \"\$@\""
+findcmd="\$FIND \$FINDPATH '(' $patterns ')' \"\$@\""
 
 # Now $findcmd is a command template, i.e. it contains a lot of quotes and escaped $variables.
 # A simple eval will correctly evaluate it to the find command
