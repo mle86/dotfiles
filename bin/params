@@ -11,7 +11,13 @@ M0="[0m"
 n=0
 while [ $# -gt 0 ]; do
 	n=$((n + 1))
-	echo "${M1}${n} [${M0}$1${M1}]${M0}"
+
+	# dash's echo command has an implicit "-e" option,
+	# always evaluating backslash sequences!
+	# That's why we use the system echo binary
+	# with explicit -E here.
+	/bin/echo -E "${M1}${n} [${M0}$1${M1}]${M0}"
+
 	shift
 done
 
