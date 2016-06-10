@@ -104,7 +104,11 @@ _setgitprompt () {
 _shorten_git_branch () {
 	case "$1" in
 		master)		echo "mst" ;;
-		revision-*)	echo "r-${1#*-}" ;;
+		hotfix/*)	echo "H/${1#*/}" ;;
+		release/*)	echo "r/${1#*/}" ;;
+		feature/*)	echo "f/${1#*/}" ;;
+		hotfix-*)	echo "H-${1#*-}" ;;
+		release-*)	echo "r-${1#*-}" ;;
 		feature-*)	echo "f-${1#*-}" ;;
 		*)		echo "$1" ;;
 	esac
