@@ -3,10 +3,52 @@
 ###  Git-Prompt:  ################################################
 
 if [ "$USER" != "root" ]; then
-	PROMPT_COMMAND=_setprompt
+	PROMPT_COMMAND=_setgitprompt
 fi
 
-_setprompt () {
+_gitinfo () {
+	local local_commits=
+	local remote_commits=
+	local changes=
+	local rebase_commit=
+	local branch=$(git rev-parse  --abbrev-ref HEAD  2>/dev/null)
+
+	if [ "$branch" = "HEAD" ]; then
+		local gitdir=$(git rev-parse  --git-dir)
+		local current_commit=$(git rev-parse  --short HEAD  2>/dev/null)
+		if [ -d "$gitdir/rebase-merge/" ]; then
+			# it's an interactive rebase
+			branch=$(git rev-parse  --abbrev-ref "$(cat -- "$gitdir/rebase-merge/head-name")")
+			rebase_commit="$current_commit"
+		elif [ -z "$current_commit" ]; then
+			# it's a fresh repo
+			branch="INIT"
+		else
+			# detached head
+			branch=$current_commit
+		fi
+	fi
+
+	if [ -n "$branch" ]; then
+
+		if changes=$(git status  --porcelain  --untracked-files=no  2>/dev/null | sed q) && [ -n "$changes" ]; then
+			changes="changes"
+		elif git status  --porcelain --untracked-files=normal  2>/dev/null  | grep -q '^?? '; then
+			changes="untracked"
+		fi
+
+		local _remote_ahead=
+		local _local_ahead=
+		local IFS=$'\t '
+		read -r _remote_ahead _local_ahead < <(git rev-list  --count  --left-right @{u}...  2>/dev/null)
+		[ -n "$_local_ahead"  ] && [ "$_local_ahead"  -gt 0 ] && local_commits="$_local_ahead"
+		[ -n "$_remote_ahead" ] && [ "$_remote_ahead" -gt 0 ] && remote_commits="$_remote_ahead"
+	fi
+
+	echo -e "$changes:$local_commits:$remote_commits:$rebase_commit:$branch"
+}
+
+_setgitprompt () {
 	local errstate="$?"
 
 	local symbol_color='\[[1;38;5;226m\]'
@@ -23,50 +65,21 @@ _setprompt () {
 	local changes_color='\[[0;38;5;121m\]'
 	local untracked_color='\[[1;38;5;88m\]'
 	local rebase_commit_color='\[[0;38;5;141m\]'
-	local init_commit_color='\[[0;38;5;255m\]'
 
-	local local_commits=
-	local remote_commits=
-	local changes=
-	local rebase=
-	local branch=$(git rev-parse  --abbrev-ref HEAD  2>/dev/null)
+	local changes= local_commits= remote_commits= rebase_commit= branch=
+	IFS=':' read changes local_commits remote_commits rebase_commit branch < <(_gitinfo)
 
-	if [ "$branch" = "HEAD" ]; then
-		local gitdir=$(git rev-parse  --git-dir)
-		local current_commit=$(git rev-parse  --short HEAD  2>/dev/null)
-		if [ -d "$gitdir/rebase-merge/" ]; then
-			# it's an interactive rebase
-			local rebase_branch=$(git rev-parse  --abbrev-ref "$(cat -- "$gitdir/rebase-merge/head-name")")
-			branch=$rebase_branch
-			rebase=" $rebase_commit_color$current_commit"
-		elif [ -z "$current_commit" ]; then
-			# it's a fresh repo
-			branch="INIT"
-		else
-			# detached head
-			branch=$current_commit
-		fi
-	fi
+	if   [ "$changes" = "changes"   ]; then changes="${changes_color}*"
+	elif [ "$changes" = "untracked" ]; then changes="${untracked_color}·"
+	else changes=" "; fi
 
-	if [ -n "$branch" ]; then
-		branch="$branch_color$(_shorten_git_branch "$branch")"
+	[ -n "$branch" ] && branch="$branch_color$(_shorten_git_branch "$branch")"
+	[ -n "$rebase" ] && rebase=" $rebase_commit_color$rebase"
+	[ -n "$remote_commits" ] && remote_commits="$remote_commits_color$remote_commits "
+	[ -n "$local_commits" ] && local_commits="$local_commits_color$local_commits "
 
-		changes=$(git status  --porcelain  --untracked-files=no  2>/dev/null | sed q)
-		changes=${changes:+"${changes_color}*"}
-		[ -z "$changes" ] && \
-			git status  --porcelain --untracked-files=normal  2>/dev/null  | grep -q '^?? ' &&
-			    changes="${untracked_color}·"
-		changes=${changes:-" "}
-
-		local _remote_ahead=
-		local _local_ahead=
-		read -r _remote_ahead _local_ahead < <(git rev-list  --count  --left-right @{u}...  2>/dev/null)
-		[ -n "$_local_ahead"  ] && [ "$_local_ahead"  -gt 0 ] && local_commits="$local_commits_color$_local_ahead "
-		[ -n "$_remote_ahead" ] && [ "$_remote_ahead" -gt 0 ] && remote_commits="$remote_commits_color$_remote_ahead "
-	fi
-
-	local prefix_color=$symbol_color
-	local suffix_color=$symbol_color
+	local prefix_color="$symbol_color"
+	local suffix_color="$symbol_color"
 	[ "$errstate" -ne 0 -a "$errstate" -ne 130 ] && \
 		suffix_color=$symbol_err_color
 		# last command returned something else than zero or 130 (killed by SIGINT)
