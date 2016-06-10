@@ -71,7 +71,8 @@ _setgitprompt () {
 
 	if   [ "$changes" = "changes"   ]; then changes="${changes_color}*"
 	elif [ "$changes" = "untracked" ]; then changes="${untracked_color}·"
-	else changes=" "; fi
+	elif [ -n "$branch" ];             then changes=" "
+	else changes= ; fi
 
 	[ -n "$branch" ] && branch="$branch_color$(_shorten_git_branch "$branch")"
 	[ -n "$rebase" ] && rebase=" $rebase_commit_color$rebase"
