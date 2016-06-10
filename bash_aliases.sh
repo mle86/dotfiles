@@ -35,6 +35,7 @@ alias '...'='cd ../..'
 alias -- '-'='cd - >/dev/null'
 
 alias l='ls $LS_OPTIONS -l'
+alias la='ls $LS_OPTIONS -la'
 
 alias shlvl='echo $SHLVL'
 alias keep='IGNOREEOF=99'
