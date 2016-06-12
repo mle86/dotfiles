@@ -15,6 +15,7 @@ ann = annotate
 annot = annotate
 stashes = stash list
 remotes = remote -v
+tags = tag -l
 ci = commit
 
 [push]
