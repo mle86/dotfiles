@@ -19,6 +19,10 @@ run *root-install.sh*.
 It will ask about every bin/ script file,
 always defaulting to 'no'.
 
+*root-install.sh* will also install some of my other GitHub projects
+by cloning them into `/usr/local/src`
+and running `make && make install`.
+
 
 ## bin/
 
