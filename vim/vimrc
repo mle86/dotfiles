@@ -47,6 +47,11 @@ set listchars=tab:\ \ ,trail:⚬,nbsp:⎵
 highlight ExtraWhitespace ctermfg=237 guifg=237
 match ExtraWhitespace /\s\+$/
 
+" F8: shortcut for easy clipboarding.
+" Hide the line numbers, hide the space/eol/tab special characters,
+" enable 'paste' mode.
+map <F8> :set nolist <CR> :set nonumber <CR> :set paste <CR>
+
 
 """""""""""""""""""""
 
