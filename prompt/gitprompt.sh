@@ -11,10 +11,12 @@ _gitinfo () {
 	local remote_commits=
 	local changes=
 	local rebase_commit=
+	local stashes=
+	local gitdir=
 	local branch=$(git rev-parse  --abbrev-ref HEAD  2>/dev/null)
 
 	if [ "$branch" = "HEAD" ]; then
-		local gitdir=$(git rev-parse  --git-dir)
+		[ -n "$gitdir" ] || gitdir=$(git rev-parse  --git-dir)
 		local current_commit=$(git rev-parse  --short HEAD  2>/dev/null)
 		if [ -d "$gitdir/rebase-merge/" ]; then
 			# it's an interactive rebase
@@ -37,6 +39,9 @@ _gitinfo () {
 			changes="untracked"
 		fi
 
+		[ -n "$gitdir" ] || gitdir=$(git rev-parse  --git-dir)
+		[ -n "$(GIT_DIR="$gitdir" git stash list --no-decorate -n 1)" ] && stashes=yes
+
 		local _remote_ahead=
 		local _local_ahead=
 		local IFS=$'\t '
@@ -45,7 +50,7 @@ _gitinfo () {
 		[ -n "$_remote_ahead" ] && [ "$_remote_ahead" -gt 0 ] && remote_commits="$_remote_ahead"
 	fi
 
-	echo -e "$changes:$local_commits:$remote_commits:$rebase_commit:$branch"
+	echo -e "$changes:$local_commits:$remote_commits:$rebase_commit:$stashes:$branch"
 }
 
 _setgitprompt () {
@@ -53,6 +58,7 @@ _setgitprompt () {
 
 	local symbol_color='\[[1;38;5;226m\]'
 	local symbol_err_color='\[[1;38;5;208m\]'
+	local stash_symbol_color='\[[0;38;5;241m\]'
 	local info_color='\[[0;38;5;226m\]'
 #	local user_color='\[[0;38;5;256m\]'
 #	local host_color='\[[0;37m\]'
@@ -66,8 +72,8 @@ _setgitprompt () {
 	local untracked_color='\[[1;38;5;88m\]'
 	local rebase_color='\[[0;38;5;141m\]'
 
-	local changes= local_commits= remote_commits= rebase= branch=
-	IFS=':' read changes local_commits remote_commits rebase branch < <(_gitinfo)
+	local changes= local_commits= remote_commits= rebase= stashes= branch=
+	IFS=':' read changes local_commits remote_commits rebase stashes branch < <(_gitinfo)
 
 	if   [ "$changes" = "changes"   ]; then changes="${changes_color}*"
 	elif [ "$changes" = "untracked" ]; then changes="${untracked_color}·"
@@ -85,7 +91,11 @@ _setgitprompt () {
 		suffix_color=$symbol_err_color
 		# last command returned something else than zero or 130 (killed by SIGINT)
 
-	local prefix="$prefix_color❮ "
+
+	if [ -n "$stashes" ]; then stashes="${stash_symbol_color}▮" #×"
+	else                       stashes=" " ; fi
+
+	local prefix="$prefix_color❮$stashes"
 	local suffix="$suffix_color❯ "
 
 	PS1="$prefix$branch$rebase$changes$remote_commits$local_commits$cwd_color\\w$suffix$sgr0"
