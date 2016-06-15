@@ -64,10 +64,10 @@ _setgitprompt () {
 	local remote_commits_color='\[[0;38;5;160m\]'
 	local changes_color='\[[0;38;5;121m\]'
 	local untracked_color='\[[1;38;5;88m\]'
-	local rebase_commit_color='\[[0;38;5;141m\]'
+	local rebase_color='\[[0;38;5;141m\]'
 
-	local changes= local_commits= remote_commits= rebase_commit= branch=
-	IFS=':' read changes local_commits remote_commits rebase_commit branch < <(_gitinfo)
+	local changes= local_commits= remote_commits= rebase= branch=
+	IFS=':' read changes local_commits remote_commits rebase branch < <(_gitinfo)
 
 	if   [ "$changes" = "changes"   ]; then changes="${changes_color}*"
 	elif [ "$changes" = "untracked" ]; then changes="${untracked_color}·"
@@ -75,7 +75,7 @@ _setgitprompt () {
 	else changes= ; fi
 
 	[ -n "$branch" ] && branch="$branch_color$(_shorten_git_branch "$branch")"
-	[ -n "$rebase" ] && rebase=" $rebase_commit_color$rebase"
+	[ -n "$rebase" ] && rebase=" $rebase_color$rebase"
 	[ -n "$remote_commits" ] && remote_commits="$remote_commits_color$remote_commits "
 	[ -n "$local_commits" ] && local_commits="$local_commits_color$local_commits "
 
