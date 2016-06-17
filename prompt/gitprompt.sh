@@ -58,7 +58,7 @@ _setgitprompt () {
 
 	local symbol_color='\[[1;38;5;226m\]'
 	local symbol_err_color='\[[1;38;5;208m\]'
-	local stash_symbol_color='\[[0;38;5;241m\]'
+	local stash_symbol_color='\[[0;38;5;239m\]'
 	local info_color='\[[0;38;5;226m\]'
 #	local user_color='\[[0;38;5;256m\]'
 #	local host_color='\[[0;37m\]'
