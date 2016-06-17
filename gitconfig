@@ -17,6 +17,7 @@ stashes = stash list
 remotes = remote -v
 tags = tag -l
 ci = commit
+shw = show
 
 [push]
 default = simple
