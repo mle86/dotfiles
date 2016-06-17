@@ -19,6 +19,7 @@ use POSIX ':sys_wait_h';
 ### Constants and configuration:  ##############################################
 
 use constant REMOVE_TZ => 1;  # Remove "+0200" timezone suffix?
+use constant REMOVE_SECONDS => 1;
 use constant ALIGN_AUTHORS => 1;  # Align author names? This causes output buffering until stdin closes.
 use constant REMOVE_CR => 1;  # Strip extra CR (\x0a) at line end?
 
@@ -219,7 +220,8 @@ while (defined($_ = next_input_line)) {
 
 	my ($commit_id, $author, $timestamp, $lineno, $line) = ($1, $2, $3, $4, $5);
 
-	$timestamp = $1  if (REMOVE_TZ && ($timestamp =~ m/^(.+?)\s+$re_tz$/));
+	$timestamp = $1  if (REMOVE_TZ && ($timestamp =~ m/^(.+?)(?:\s+$re_tz)?$/));
+	$timestamp = $1.$2  if (REMOVE_SECONDS && ($timestamp =~ m/^(.+?):\d\d((?:\s+$re_tz)?)$/));
 	$lineno = sprintf '% 4d', $lineno;
 	$line =~ s/\r+$//  if REMOVE_CR;
 
