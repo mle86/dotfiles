@@ -30,6 +30,15 @@ mkcd () {
 	mkdir -p -- "$@" && cd -- "$1"
 }
 
+cd () {
+	if [ -n "$1" ] && [ -f "$1" ]; then
+		# if the argument is a file, go to its directory
+		command cd -- "$(dirname -- "$1")"
+	else
+		command cd "$@"
+	fi
+}
+
 alias '..'='cd ..'
 alias '...'='cd ../..'
 alias -- '-'='cd - >/dev/null'
