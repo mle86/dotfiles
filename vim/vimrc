@@ -1,11 +1,42 @@
 "" Vim_settings:  """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+set nocompatible
+
 " don't remove indentation on #-lines:
 set cinkeys-=0#
 set indentkeys-=0#
-
 " show line numbers:
 set number
+" show status line with current lineno and colno:
+set ruler
+" show command and visual block size on status line:
+set showcmd
+" show current filename in terminal window title, if supported:
+set title
+" timeout for key combinations,
+" very short timeout for terminal-based key combinations (like ESC O D)
+set timeoutlen=1000
+set ttimeoutlen=80
+" Always show N lines around cursor when scrolling vertically:
+set scrolloff=5
+" nice tab-completion on command line:
+set wildmenu
+set wildignore=*.o,*~,*.pyc,*.bak
+" more powerful backspacing:
+set backspace=indent,eol,start
+" automatic indenting:
+set cindent
+" suppress crappy ~ files:
+set nobackup
+" allow saving up to 1000 lines (and up to 1500 kB) in the viminfo file
+set viminfo='100,<1000,s1500,:50
+" allow rich colors:
+set t_Co=256
+" ignore case in search patterns, except...
+set ignorecase
+" ...if the search pattern contains upper case chars.
+set smartcase
+
 
 
 "" Load_Plugins:  """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -34,6 +65,12 @@ let g:EasyMotion_keys = 'asdghklöäqwertzuiopüyxcvbnmfj,-+'
 
 "" Colors_and_highlighting:  """""""""""""""""""""""""""""""""""""""""""""""""""
 
+" use correct color schemes, most terminals are dark, but Vim's autodetection does not always work:
+set background=dark
+
+syntax on
+
+hi Comment ctermfg=darkgrey
 hi LineNr ctermfg=0 ctermbg=0 cterm=bold
 
 " show trailing spaces as small grey circles, show nbsp as "⎵".  (⚫,⚬)
@@ -54,9 +91,18 @@ autocmd BufRead,BufNewFile *.php colorscheme mle-php
 " enable 'paste' mode.
 map <F8> :set nolist <CR>:set nonumber <CR>:set paste <CR>
 
+" F10: write, make -C current-file-directory
+map <F10> :w<CR>:!make -C %:p:h<CR>
+
+" Alt_S: save shortcut
+map <ESC>s :w<CR>
+
 " Alt_Y: shortcut for external commands.
 map  <ESC>y  :!
 imap <ESC>y <C-O>:!
+
+" Alt_Dot: special 'dot' operation
+map <ESC>. .`[
 
 " Backslash_Enter: easyMotion
 map \<Enter> <Plug>(easymotion-bd-w)
