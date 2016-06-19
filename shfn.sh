@@ -2,32 +2,16 @@
 
 HERE="$(dirname -- "$(readlink -f -- "$0")")"
 
-ansi_good='[1;32m'
-ansi_dark='[0;38;5;240m'
-ansi_warning='[1;38;5;208m'
-ansi_prompt_symbol='[1;33m'
-ansi_prompt_symbol2="$ansi_dark[1m"
-ansi_highlight='[1m'
-ansi_reset='[0m'
-ansi_promptchar='[1;4m'
+. $HERE/shfn/ansi.sh
 
 binfiles () { ls -1 bin/ ; }
 
-# warn message
-# Prints the message, but in the $ansi_warning color.
-warn () { echo "$ansi_warning ""$@""$ansi_reset" >&2; }
-
-# good message
-# Prints the message, but in the $ansi_good color.
-good () { echo "$ansi_good ""$@""$ansi_reset" ; }
-
-# hi word...
-# Prints its arguments, but prefixed with the highlighting ansi sequence.
-hi () { echo "$ansi_highlight""$@""$ansi_reset" ; }
+ansi_prompt_symbol='[1;33m'  # yellow
+ansi_prompt_symbol2="$ansi_dark[1m"  # dark grey
 
 # pc word...
-# Prints its arguments, but prefixed with the "prompt option character" ansi sequence.
-pc () { echo "$ansi_promptchar""$@""$ansi_reset" ; }
+#  Shortcut for prompt character highlighting (bold + underlined).
+pc () { UL "$@" ; }
 
 # z command [arguments...]
 # Runs the command as if there had been no 'z' prefix at all,
