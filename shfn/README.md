@@ -1,3 +1,8 @@
+# dotfiles/shfn/
+
+This directory contains shell functions I use in this and some other projects.
+
+
 ## [ansi.sh](ansi.sh)
 
 Functions for colored output.

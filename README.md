@@ -143,3 +143,13 @@ It contains small shell and Perl scripts.
 	Existing files will simply be opened, not overwritten.  
 	Syntax: `T [FILENAME=test.sh]`
 
+
+## [shfn/](shfn/)
+
+This directory contains shell functions I use in this and some other projects.
+They are collected here so I don't lose/forget them.
+Most projects will still use them through copy&paste, though,
+because including this whole repo as a submodule just for one or two shell functions would be excessive.
+
+The directory contains its own [README file](shfn/README.md).
+
