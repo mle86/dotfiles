@@ -34,7 +34,16 @@ cd () {
 	if [ -n "$1" ] && [ -f "$1" ]; then
 		# if the argument is a file, go to its directory
 		command cd -- "$(dirname -- "$1")"
+
+	elif [ ! -e "$1" ] && [ -d "$(dirname -- "$1")" ] && [ "${1%/l}/l" = "$1" ]; then
+		# argument ends with "/l", does not exist, but the parent directory exists...
+		# yep, I missed Enter between "cd" and "l" again.
+		command cd "$(dirname -- "$1")"
+		local ansi_reset='[0m' ansi_warning='[1;38;5;208m'
+		echo "${ansi_warning}cd: Assumed $(dirname -- "$1")/ instead of $1${ansi_reset}" >&2
+
 	else
+		# regular cd
 		command cd "$@"
 	fi
 }
