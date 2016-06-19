@@ -50,3 +50,16 @@ is_absolute_path () {
 	[ "/${1#/}" = "$1" ]
 }
 
+# is_digits [word=$ANSWER]...
+#  Returns true if all arguments are digits-only, false otherwise.
+is_digits () {
+	[ $# -gt 0 ] || set -- "$ANSWER"
+
+	# join all input words together,
+	# replace linebreaks with 'x' (not a digit, so grep can catch those too),
+	# grep for any non-digit,
+	# invert search result:
+	local IFS=  # join $* without spaces in between words
+	echo -n "$*" | paste -sdx | grep -qv '[^0-9]'
+}
+

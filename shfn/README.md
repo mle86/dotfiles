@@ -55,6 +55,14 @@ They are boolean test functions which never produce any output, just a true or f
 * `is word [input=$ANSWER]`  
 	Checks if the input equals a word, regardless of its case.
 	The *$word* argument should be in upper-case, because *is()* will uppercase the input for a case-insensitive check.
+	For a case-sensitive check, use *iscase()*.
+
+* `iscase word [input=$ANSWER]`  
+	Checks if the input exactly equals a word.
+	This is the case-sensitive version of *is()*.
 
 * `is_absolute_path [filename=$ANSWER]`  
  	Determines whether its argument starts with a slash (i.e. looks like an absolute path).
+
+* `is_digits [word=$ANSWER]…`  
+	Returns true if all arguments are digits-only, false otherwise.
