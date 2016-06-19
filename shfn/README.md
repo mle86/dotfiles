@@ -36,3 +36,25 @@ Functions for colored output.
 	*dark()* uses this.
 * `$ansi_reset`
 	The ANSI sequence which resets all output attributes ([SGR 0](https://en.wikipedia.org/wiki/ANSI_escape_code#graphics)).
+
+
+## [is.sh](is.sh)
+
+These functions allow easy string comparisons of their argument or the *$ANSWER* envvar.
+They are used in conjunction with the *ask()* function (which writes to *$ANSWER*).
+They are boolean test functions which never produce any output, just a true or false return status.
+
+* `is_yes [input=$ANSWER]`  
+	Checks if the input looks like an explicit "yes" answer.
+	Accepted values are `y`, `Y`, `j`, `J`, and `yes`.
+
+* `is_no [input=$ANSWER]`  
+	Checks if the input looks like an explicit "no" answer.
+	Accepted values are `n`, `N`, and `no`.
+
+* `is word [input=$ANSWER]`  
+	Checks if the input equals a word, regardless of its case.
+	The *$word* argument should be in upper-case, because *is()* will uppercase the input for a case-insensitive check.
+
+* `is_absolute_path [filename=$ANSWER]`  
+ 	Determines whether its argument starts with a slash (i.e. looks like an absolute path).

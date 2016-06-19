@@ -2,6 +2,7 @@
 
 HERE="$(dirname -- "$(readlink -f -- "$0")")"
 
+. $HERE/shfn/is.sh
 . $HERE/shfn/ansi.sh
 
 binfiles () { ls -1 bin/ ; }
@@ -34,23 +35,6 @@ findcmd () {
 	esac done
 	echo "$first"
 }
-
-# is_yes()
-# Checks if $ANSWER looks like a yes.
-is_yes () { [ "$ANSWER" = 'y' -o "$ANSWER" = 'Y' -o "$ANSWER" = 'yes' -o "$ANSWER" = 'j' -o "$ANSWER" = 'J' ]; }
-
-# is_no()
-# Checks if $ANSWER looks like a no.
-is_no  () { [ "$ANSWER" = 'n' -o "$ANSWER" = 'N' -o "$ANSWER" = 'no' ]; }
-
-# is letter
-# Checks if $ANSWER is a single letter.
-# The $letter argument should be in upper-case, because is() will lowercase it for a case-insensitive check.
-is () { [ "$ANSWER" = "$1" -o "$ANSWER" = "$(echo -n "$1" | tr '[:upper:]' '[:lower:]')" ]; }
-
-# is_absolute_path path|filename
-# Determines whether its argument starts with a slash (i.e. looks like an absolute path).
-is_absolute_path () { [ "/${1#/}" = "$1" ]; }
 
 # ask PROMPT [DEFAULT [LEVEL]]
 # Shows a prompt and waits for user input.
