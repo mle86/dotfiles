@@ -102,3 +102,30 @@ They are boolean test functions which never produce any output, just a true or f
 
 * `is_digits [word=$ANSWER]…`  
 	Returns true if all arguments are digits-only, false otherwise.
+
+
+## [misc.sh](misc.sh)
+
+* `remove_trailing_slashes string`  
+	Removes any trailing slashes in the string, if there are any,
+	and prints the result.
+
+* `indent [level=2]`  
+	Prints its stdin input.
+	Every line will be prefixed with *level* leading spaces.
+	(If *level* is not a number, it will be used as the indentation string.)  
+	This function needs the *is_digits()* test function from [is.sh](is.sh).
+
+* `suffix word…`  
+	Prints its stdin input.
+	The function arguments will be appended to every line (with spaces in between).
+	No extra space will be printed between the line end and the function's first argument.
+
+* `replace filename [fileMode] < content`  
+	Overwrites a file with new content.
+	The process is atomic because the function will write stdin to a temporary file in the same directory first,
+	then rename the temporary file to the target name with `mv -f`.  
+	If *fileMode* is set, the file's mode will be set to that value using *chmod(1)*.  
+	If *fileMode* is not set and the file already existed, its mode won't be changed.  
+	If *fileMode* is not set and the file did not already exist, its mode will be set to *0666 - umask*.
+
