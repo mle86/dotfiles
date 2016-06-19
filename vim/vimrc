@@ -1,29 +1,4 @@
-filetype off
-
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-" Vundle plugins:
-
-
-"Plugin 'bling/vim-airline' 
-Bundle 'tpope/vim-surround'
-Bundle 'tpope/vim-repeat'
-Bundle 'tmhedberg/matchit'
-Bundle 'dantler/vim-alternate'
-Bundle 'Lokaltog/vim-easymotion'
-
-Bundle "MarcWeber/vim-addon-mw-utils"
-Bundle "tomtom/tlib_vim"
-"Bundle 'garbas/vim-snipmate' 
-
-
-call vundle#end()
-filetype plugin indent on
-
-
-" easyMotion
-map \<Enter> <Plug>(easymotion-bd-w)
-let g:EasyMotion_keys = 'asdghklöäqwertzuiopüyxcvbnmfj,-+'
+"" Vim_settings:  """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " don't remove indentation on #-lines:
 set cinkeys-=0#
@@ -31,14 +6,35 @@ set indentkeys-=0#
 
 " show line numbers:
 set number
-highlight LineNr ctermfg=0 ctermbg=0 cterm=bold
 
-" custom color scheme for PHP:
-autocmd BufRead,BufNewFile *.php colorscheme mle-php
 
-" Alt-Y shortcut for external commands.
-map <ESC>y  :!
-imap <ESC>y <C-O>:!
+"" Load_Plugins:  """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+filetype off
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" Vundle plugins:
+
+	"Plugin 'bling/vim-airline'
+	Bundle 'tpope/vim-surround'
+	Bundle 'tpope/vim-repeat'
+	Bundle 'tmhedberg/matchit'
+	Bundle 'dantler/vim-alternate'
+	Bundle 'Lokaltog/vim-easymotion'
+	
+	Bundle "MarcWeber/vim-addon-mw-utils"
+	Bundle "tomtom/tlib_vim"
+	"Bundle 'garbas/vim-snipmate'
+
+call vundle#end()
+filetype plugin indent on
+
+let g:EasyMotion_keys = 'asdghklöäqwertzuiopüyxcvbnmfj,-+'
+
+
+"" Colors_and_highlighting:  """""""""""""""""""""""""""""""""""""""""""""""""""
+
+hi LineNr ctermfg=0 ctermbg=0 cterm=bold
 
 " show trailing spaces as small grey circles, show nbsp as "⎵".  (⚫,⚬)
 " vim.wikia.com/wiki/Highlight_unwanted_spaces
@@ -47,10 +43,23 @@ set listchars=tab:\ \ ,trail:⚬,nbsp:⎵
 highlight ExtraWhitespace ctermfg=237 guifg=237
 match ExtraWhitespace /\s\+$/
 
+" custom color scheme for PHP:
+autocmd BufRead,BufNewFile *.php colorscheme mle-php
+
+
+"" Shortcuts:  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 " F8: shortcut for easy clipboarding.
 " Hide the line numbers, hide the space/eol/tab special characters,
 " enable 'paste' mode.
 map <F8> :set nolist <CR>:set nonumber <CR>:set paste <CR>
+
+" Alt_Y: shortcut for external commands.
+map  <ESC>y  :!
+imap <ESC>y <C-O>:!
+
+" Backslash_Enter: easyMotion
+map \<Enter> <Plug>(easymotion-bd-w)
 
 
 """""""""""""""""""""
