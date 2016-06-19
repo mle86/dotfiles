@@ -66,7 +66,7 @@ Functions for colored output.
 
 * `$ANSWER`  
 	Where *ask()* will store the user input.
-	Several test functions in [is.sh](is.sh) will use this variable as their input.
+	Several test functions in [is.sh](#issh) will use this variable as their input.
 
 
 ## [fail.sh](fail.sh)
@@ -82,7 +82,7 @@ Functions for colored output.
 ## [is.sh](is.sh)
 
 These functions allow easy string comparisons of their argument or the *$ANSWER* envvar.
-They are used in conjunction with the *ask()* function (which writes to *$ANSWER*).
+They are used in conjunction with the *[ask](#asksh)()* function (which writes to *$ANSWER*).  
 They are boolean test functions which never produce any output, just a true or false return status.
 
 * `is_yes [input=$ANSWER]`  
@@ -119,7 +119,7 @@ They are boolean test functions which never produce any output, just a true or f
 	Prints its stdin input.
 	Every line will be prefixed with *level* leading spaces.
 	(If *level* is not a number, it will be used as the indentation string.)  
-	This function needs the *is_digits()* test function from [is.sh](is.sh).
+	This function needs the *is_digits()* test function from [is.sh](#issh).
 
 * `suffix word…`  
 	Prints its stdin input.
