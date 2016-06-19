@@ -7,26 +7,26 @@ This directory contains shell functions I use in this and some other projects.
 
 Functions for colored output.
 
-* `warn message…`  
+* <code><b>warn</b> message…</code>  
 	Prints the message to *stderr*, but in the *$ansi_warning* color.
 
-* `good message…`  
+* <code><b>good</b> message…</code>  
 	Prints the message, but in the *$ansi_good* color.
 
-* `dark message…`  
+* <code><b>dark</b> message…</code>  
 	Prints the message, but in the *$ansi_dark* color.
 
-* `hi message…`  
+* <code><b>hi</b> message…</code>  
 	Prints its arguments, but prefixed with the "bold" ansi sequence.
 	It will end its output with [SGR 22](https://en.wikipedia.org/wiki/ANSI_escape_code#graphics) instead of *$ansi_reset*,
 	so it can be used inline in possibly-colored strings.
 
-* `ul message…`  
+* <code><b>ul</b> message…</code>  
 	Prints its arguments, but prefixed with the "underlined" ansi sequence.
 	It will end its output with [SGR 24](https://en.wikipedia.org/wiki/ANSI_escape_code#graphics) instead of *$ansi_reset*,
 	so it can be used inline in possibly-colored strings.
 
-* `UL message…`  
+* <code><b>UL</b> message…</code>  
 	Prints its arguments, but prefixed with the "underlined" and "bold" ansi sequences.
 	This is a combination of *hi()* and *ul()*.
 
@@ -45,7 +45,7 @@ Functions for colored output.
 
 ## [ask.sh](ask.sh)
 
-* `ask prompt [default [preset]]`  
+* <code><b>ask</b> prompt [default [preset]]</code>  
 	Shows a *prompt* to the user and waits for input.
 	The user input is saved in the *$ANSWER* envvar.
 	
@@ -71,10 +71,10 @@ Functions for colored output.
 
 ## [fail.sh](fail.sh)
 
-* `err errorMessage…`  
+* <code><b>err</b> errorMessage…</code>  
 	Prints the errorMessage on *stderr*.
 
-* `fail [exitStatus=1] errorMessage`  
+* <code><b>fail</b> [exitStatus=1] errorMessage</code>  
 	Prints the errorMessage on *stderr* (using the *err()* function),
 	then exits the script with *exitStatus*.
 
@@ -85,48 +85,48 @@ These functions allow easy string comparisons of their argument or the *$ANSWER*
 They are used in conjunction with the *[ask](#asksh)()* function (which writes to *$ANSWER*).  
 They are boolean test functions which never produce any output, just a true or false return status.
 
-* `is_yes [input=$ANSWER]`  
+* <code><b>is_yes</b> [input=$ANSWER]</code>  
 	Checks if the input looks like an explicit "yes" answer.
 	Accepted values are `y`, `Y`, `j`, `J`, and `yes`.
 
-* `is_no [input=$ANSWER]`  
+* <code><b>is_no</b> [input=$ANSWER]</code>  
 	Checks if the input looks like an explicit "no" answer.
 	Accepted values are `n`, `N`, and `no`.
 
-* `is word [input=$ANSWER]`  
+* <code><b>is</b> word [input=$ANSWER]</code>  
 	Checks if the input equals a word, regardless of its case.
 	The *$word* argument should be in upper-case, because *is()* will uppercase the input for a case-insensitive check.
 	For a case-sensitive check, use *iscase()*.
 
-* `iscase word [input=$ANSWER]`  
+* <code><b>iscase</b> word [input=$ANSWER]</code>  
 	Checks if the input exactly equals a word.
 	This is the case-sensitive version of *is()*.
 
-* `is_absolute_path [filename=$ANSWER]`  
+* <code><b>is_absolute_path</b> [filename=$ANSWER]</code>  
  	Determines whether its argument starts with a slash (i.e. looks like an absolute path).
 
-* `is_digits [word=$ANSWER]…`  
+* <code><b>is_digits</b> [word=$ANSWER]…</code>  
 	Returns true if all arguments are digits-only, false otherwise.
 
 
 ## [misc.sh](misc.sh)
 
-* `remove_trailing_slashes string`  
+* <code><b>remove_trailing_slashes</b> string</code>  
 	Removes any trailing slashes in the string, if there are any,
 	and prints the result.
 
-* `indent [level=2]`  
+* <code><b>indent</b> [level=2]</code>  
 	Prints its stdin input.
 	Every line will be prefixed with *level* leading spaces.
 	(If *level* is not a number, it will be used as the indentation string.)  
 	This function needs the *is_digits()* test function from [is.sh](#issh).
 
-* `suffix word…`  
+* <code><b>suffix</b> word…</code>  
 	Prints its stdin input.
 	The function arguments will be appended to every line (with spaces in between).
 	No extra space will be printed between the line end and the function's first argument.
 
-* `replace filename [fileMode] < content`  
+* <code><b>replace</b> filename [fileMode] < content</code>  
 	Overwrites a file with new content.
 	The process is atomic because the function will write stdin to a temporary file in the same directory first,
 	then rename the temporary file to the target name with `mv -f`.  
