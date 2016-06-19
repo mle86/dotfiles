@@ -38,6 +38,32 @@ Functions for colored output.
 	The ANSI sequence which resets all output attributes ([SGR 0](https://en.wikipedia.org/wiki/ANSI_escape_code#graphics)).
 
 
+## [ask.sh](ask.sh)
+
+* `ask prompt [default [preset]]`  
+	Shows a *prompt* to the user and waits for input.
+	The user input is saved in the *$ANSWER* envvar.
+	
+	If the user input is empty because the user simply pressed Enter,
+	*$ANSWER* will be set to *default* instead.
+	If there is an EOF condition (because the user hit Ctrl-D),
+	the function will print a newline and return with an error status.
+	
+	If *preset* is set, the function will _not_ wait for user input,
+	but set *$ANSWER* to *preset* and continue immediately.
+	(*preset* can also be set to "default", in which case *$ANSWER*
+	 will be set to *default* immediately.)  
+	This might be interesting for scripts which support both a
+	user-input mode and an "automated" mode.
+	
+	Returns false (1) if there was an EOF condition,
+	true otherwise.
+
+* `$ANSWER`  
+	Where *ask()* will store the user input.
+	Several test functions in [is.sh](is.sh) will use this variable as their input.
+
+
 ## [is.sh](is.sh)
 
 These functions allow easy string comparisons of their argument or the *$ANSWER* envvar.
