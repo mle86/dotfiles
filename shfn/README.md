@@ -64,6 +64,16 @@ Functions for colored output.
 	Several test functions in [is.sh](is.sh) will use this variable as their input.
 
 
+## [fail.sh](fail.sh)
+
+* `err errorMessage…`  
+	Prints the errorMessage on *stderr*.
+
+* `fail [exitStatus=1] errorMessage`  
+	Prints the errorMessage on *stderr* (using the *err()* function),
+	then exits the script with *exitStatus*.
+
+
 ## [is.sh](is.sh)
 
 These functions allow easy string comparisons of their argument or the *$ANSWER* envvar.
