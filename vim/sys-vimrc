@@ -1,0 +1,28 @@
+" sensible defaults:
+set nocompatible
+syntax on
+" timeout for key combinations,
+" very short timeout for terminal-based key combinations (like ESC O D)
+set timeoutlen=1000
+set ttimeoutlen=80
+" Always show N lines around cursor when scrolling vertically:
+set scrolloff=5
+" show status line with current lineno and colno:
+set ruler
+" show command and visual block size on status line:
+set showcmd
+" allow saving up to 1000 lines (and up to 1500 kB) in the viminfo file
+set viminfo='100,<1000,s1500,:50
+" show current filename in terminal window title, if supported:
+set title
+" allow rich colors:
+set t_Co=256
+" ignore case in search patterns, except...
+set ignorecase
+" ...if the search pattern contains upper case chars.
+set smartcase
+" use correct color schemes, most terminals are dark:
+set background=dark
+
+hi Comment ctermfg=darkgrey
+

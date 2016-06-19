@@ -21,5 +21,9 @@ for file in $(binfiles); do
 	ask_copy "$bindest/$file" "bin/$file"
 done
 
+# This file contains sensible system-wide vim settings.
+# They're supposed to be mostly non-invasive for other users.
+ask_copy "/etc/vim/vimrc.local" "vim/sys-vimrc"
+
 echo ""
 
