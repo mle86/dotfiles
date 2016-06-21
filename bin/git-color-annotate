@@ -89,10 +89,10 @@ sub find_author_color ($) {
 }
 
 sub colorize {
-	my ($color, $text, $bold) = @_;
+	my ($color, $text) = @_;
 
 	my $prefix = '0';
-	if ($color =~ m/^([\+-\/]*)(.+)$/) {
+	if ($color =~ m/^([\+\-\/]*)(.+)$/) {
 		local $_ = $1;
 		$color = $2;
 		$prefix .= ';1'  if m#\+#;
@@ -107,7 +107,7 @@ sub colorize {
 		$color = "[${prefix};38;5;${color}m"
 	}
 
-	return "${color}${text}" . SGR0
+	return $color . $text . SGR0
 }
 
 sub next_input_line () {
