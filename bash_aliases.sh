@@ -182,7 +182,7 @@ T () {
 		# After that, +$goline moves the cursor.
 		# Additional template-specific vim commands are read from $vimscript (if it exists).
 
-		vim -c ":1r $template" -c ':0d' +$goline $cmd_vimscript -- "$filename"
+		vim -c ":1r $template" -c ':0d _' +$goline $cmd_vimscript -- "$filename"
 	else
 		vim $cmd_vimscript -- "$filename"
 	fi
