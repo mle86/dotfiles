@@ -134,3 +134,13 @@ They are boolean test functions which never produce any output, just a true or f
 	If *fileMode* is not set and the file already existed, its mode won't be changed.  
 	If *fileMode* is not set and the file did not already exist, its mode will be set to *0666 - umask*.
 
+* <code><b>define</b> [-t] varname < input</code>  
+	Assigns its *stdin* input to a variable.
+	Similar to the *read* builtin, but it does not care about newlines.
+	This is useful to assign a heredoc to a variable.  
+	If trailing newlines should be preserved, use the *-t* option.
+	Without that option, _all_ trailing newline characters will be removed,
+	similar to `$(...)` assignments.
+	Note that the *-t* option will still remove _one_ trailing newline character (if present).  
+	Returns true if *stdin* was readable, false otherwise (in this case, *$varname* is not changed).
+
