@@ -13,7 +13,7 @@ alias grep='grep --color=auto'
 alias ls='ls $LS_OPTIONS'
 
 export EDITOR='vim'
-export LESS='-R'
+export LESS='-R -i'
 
 unset IGNOREEOF
 
