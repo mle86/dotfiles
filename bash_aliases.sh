@@ -41,6 +41,7 @@ cd () {
 		# argument ends with "/l", does not exist, but the parent directory exists...
 		# yep, I missed Enter between "cd" and "l" again.
 		command cd -- "$(dirname -- "$1")"
+		l
 		echo "${ansi_warning}cd: Assumed $(dirname -- "$1")/ instead of $1${ansi_reset}" >&2
 
 	else
