@@ -26,6 +26,9 @@ export PATH="$PATH:$HOME/bin"
 
 ###  Abkürzungen:  ###############################################
 
+alias l='ls $LS_OPTIONS -l'
+alias la='ls $LS_OPTIONS -la'
+
 mkcd () {
 	mkdir -p -- "$@" && command cd -- "$1"
 }
@@ -53,9 +56,6 @@ cd () {
 alias '..'='command cd ..'
 alias '...'='command cd ../..'
 alias -- '-'='command cd - >/dev/null'
-
-alias l='ls $LS_OPTIONS -l'
-alias la='ls $LS_OPTIONS -la'
 
 alias shlvl='echo $SHLVL'
 alias keep='IGNOREEOF=99'
