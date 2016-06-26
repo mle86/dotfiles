@@ -83,6 +83,7 @@ typo_alias () {
 	eval "$wrong () { history -s \"$correct\" \"\$@\" ; \"$correct\" \"\$@\" ; }"
 }
 typo_alias cmhod chmod
+typo_alias ivm   vim
 
 tf () {
 	[ -n "$1" ] || set -- '/var/log/syslog'
