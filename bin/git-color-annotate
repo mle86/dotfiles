@@ -211,7 +211,7 @@ if (-t STDOUT) {
 ### Main input loop:  ##########################################################
 
 my $re_commitid = '[0-9a-f]+';
-my $re_tz = '\+\d{1,4}';
+my $re_tz = '[\+\-]\d{1,4}';
 my $re_time = '\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(?: '.$re_tz.')?';
 
 while (defined($_ = next_input_line)) {
