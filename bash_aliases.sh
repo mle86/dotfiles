@@ -40,13 +40,15 @@ cd () {
 	local ansi_warning='[1;38;5;208m' ansi_reset='[0m'
 	if [ -n "$1" ] && [ -f "$1" ]; then
 		# if the argument is a file, go to its directory
-		command cd -- "$(dirname -- "$1")"
+		command    cd -- "$(dirname -- "$1")"
+		history -s cd -- "$(dirname -- "$1")"
 		echo "${ansi_warning}cd: Assumed $(dirname -- "$1")/ instead of $1${ansi_reset}" >&2
 
 	elif [ ! -e "$1" ] && [ -d "$(dirname -- "$1")" ] && [ "${1%/l}/l" = "$1" ]; then
 		# argument ends with "/l", does not exist, but the parent directory exists...
 		# yep, I missed Enter between "cd" and "l" again.
-		command cd -- "$(dirname -- "$1")"
+		command    cd -- "$(dirname -- "$1")"
+		history -s cd -- "$(dirname -- "$1")"
 		l
 		echo "${ansi_warning}cd: Assumed $(dirname -- "$1")/ instead of $1${ansi_reset}" >&2
 
@@ -75,7 +77,12 @@ alias gdc='git diff --diff-algorithm=minimal --cached'
 
 alias myip='curl https://ip.eul.cc/'
 
-alias cmhod='chmod'  # common typo
+typo_alias () {
+	local wrong="$1"
+	local correct="$2"
+	eval "$wrong () { history -s \"$correct\" \"\$@\" ; \"$correct\" \"\$@\" ; }"
+}
+typo_alias cmhod chmod
 
 tf () {
 	[ -n "$1" ] || set -- '/var/log/syslog'
