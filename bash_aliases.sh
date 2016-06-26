@@ -172,6 +172,8 @@ T () {
 	# Short cut: .sh gets expanded to test.sh
 	echo "$filename" | grep -q '^\.[[:alnum:]]\+$' && filename="$default_name$filename"
 
+	history -s vim -- "$filename"
+
 	if [ -e "$filename" ]; then
 		echo "File $filename already exists!"  >&2
 		# Don't overwrite it!
