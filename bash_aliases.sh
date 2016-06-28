@@ -139,10 +139,10 @@ beanstalk () {
 
 # mle 2016-01-05   'docker exec' shortcut:
 dx () {
-	if [ -z "$1" ]; then
+	if [ -z "$1" ] || [ "$1" = "-a" ]; then
 		echo "usage: dx CONTAINERNAME [COMMAND=$SHELL]"  >&2
 		echo ""  >&2
-		docker ps  >&2
+		docker ps $1  >&2
 		return 9
 	fi
 
