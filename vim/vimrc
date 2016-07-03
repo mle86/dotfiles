@@ -89,7 +89,7 @@ autocmd BufRead,BufNewFile *.php colorscheme mle-php
 " F8: shortcut for easy clipboarding.
 " Hide the line numbers, hide the space/eol/tab special characters,
 " enable 'paste' mode.
-map  <F8>      :set nolist nonumber paste <CR>
+map  <F8>      :set nolist nonumber paste <CR>i
 imap <F8> <C-O>:set nolist nonumber paste <CR>
 
 " F10: write, make -C current-file-directory
