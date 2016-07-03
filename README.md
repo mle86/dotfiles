@@ -99,6 +99,11 @@ It contains small shell and Perl scripts.
 			don't report mode/ownership problems.
 	* *-v*, *--verbose*: Report every copied file.
 
+* **[ts](bin/ts):**  
+	Prints the current UNIX timestamp.  
+	This only reason for this not to be a one-line shell alias
+	is that it can be run with *watch*.
+
 * **[u](bin/u):**  
 	This is a "*id $(getent passwd $1)*" wrapper:
 	It takes a User ID argument
