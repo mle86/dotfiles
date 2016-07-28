@@ -48,6 +48,9 @@ my @colors_commits = ( # Available colors for commit IDs.
 	244, 249, 253,
 );
 
+my %force_commit_colors = ( '00000000'          => 0 );
+my %force_author_colors = ( 'Not Committed Yet' => 0 );
+
 use constant COLOR_TIMESTAMP => '248';  # Timestamp color.
 use constant COLOR_LINENO    =>'+245';  # Line number color.
 
@@ -58,8 +61,8 @@ my @input_lines  = ( );
 my @output_lines = ( );
 my $author_maxlen = 0;
 my $is_input_filter = 0;
-my %cache_commit = ( );
-my %cache_author = ( );
+my %cache_commit = %force_commit_colors;
+my %cache_author = %force_author_colors;
 
 
 ### Helper functions:  #########################################################
