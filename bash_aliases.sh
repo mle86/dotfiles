@@ -200,6 +200,12 @@ T () {
 	else
 		vim $cmd_vimscript -- "$filename"
 	fi
+	local vimstatus=$?
+
+	case "$filename" in
+		*.sh|*.pl)  chmod --quiet +x -- "$filename" || true ;;
+	esac
+	return $vimstatus
 }
 
 
