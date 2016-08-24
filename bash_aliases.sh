@@ -74,6 +74,7 @@ alias gb='git branch -avv'
 alias ga='git add -p'
 alias gd='git diff --diff-algorithm=minimal'
 alias gdc='git diff --diff-algorithm=minimal --cached'
+alias gco='git checkout'
 
 alias myip='curl https://ip.eul.cc/'
 
