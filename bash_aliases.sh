@@ -76,7 +76,12 @@ alias gd='git diff --diff-algorithm=minimal'
 alias gdc='git diff --diff-algorithm=minimal --cached'
 alias gco='git checkout'
 
-alias myip='curl https://ip.eul.cc/'
+myip () {
+	( ip addr show dev eth0 ; ip addr show dev wlan0 ) | \
+		grep -e 'inet ' -e 'inet6' |\
+		grep -P '(?<!brd) [0-9a-f]+[:\.][0-9a-f:\.]+'
+	curl https://ip.eul.cc/
+}
 
 typo_alias () {
 	local wrong="$1"
