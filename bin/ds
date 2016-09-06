@@ -20,7 +20,7 @@ my %color = (
 );
 sub color {
 	if (-d $_[0]) { return "$color{dir}$_[0]$color{sgr0}" }
-	elsif (-f $_[0] && $_[0] =~ m/~$|\.bkup|\.bak|\.swp/) { return "$color{backup}$_[0]$color{sgr0}" }
+	elsif (-f $_[0] && $_[0] =~ m/~$|^#.+#$|\.bkup|\.bak|\.swp/) { return "$color{backup}$_[0]$color{sgr0}" }
 	else { return $_[0] }
 }
 
