@@ -10,6 +10,11 @@ autocrlf = input
 [color]
 ui = auto
 
+[color "diff"]
+meta = "#06b5aa"
+frag = "#06b5aa"
+func = "#26d5ca"
+
 [alias]
 ann = annotate
 annot = annotate
