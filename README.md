@@ -32,11 +32,11 @@ It contains small shell and Perl scripts.
 * **[ds](bin/ds):**  
 	This is a prettier variant of "*du -sh * | sort*".
 	All it does is list the current directory's contents, summarize their sizes, and sort by size (smallest first).
-	Also, the K/M/G/T suffixes are will be colored differently,
+	Also, the K/M/G/T suffixes will be colored differently,
 	indentation will line up nicely,
 	directories will be colored blue in the output,
 	and backup files (\*~, \*.bak, \*.bkup, \*.swp) will be colored dark grey.
-	Really useful to get an overview which directories are hogging the hard disk space now.  
+	Really useful to get an overview about which directories are hogging the hard disk space now.  
 	Syntax: `ds [DIRECTORY=.]`
 
 * **[fn](bin/fn):**  
