@@ -104,14 +104,6 @@ It contains small shell and Perl scripts.
 	This only reason for this not to be a one-line shell alias
 	is that it can be run with *watch*.
 
-* **[u](bin/u):**  
-	This is a "*id $(getent passwd $1)*" wrapper:
-	It takes a User ID argument
-	and looks up the account's username.  
-	Syntax: `u [-n] UID`  
-	The *-n* option causes *u* just to print the username
-	instead of calling the *id* program with it.
-
 
 ## Some of the less-boring aliases and functions in [.bash_aliases](bash_aliases.sh)
 
