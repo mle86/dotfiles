@@ -214,6 +214,10 @@ T () {
 	return $vimstatus
 }
 
+# https://gist.github.com/mwhite/6887990#gistcomment-1870225
+alias gcl='git checkout @{-1}'
+
+
 
 ###  Farben:  ####################################################
 
