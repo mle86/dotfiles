@@ -1,0 +1,106 @@
+#!/bin/sh
+# mle 2017-10-22
+PROGNAME=$(basename -- "$0")
+
+help () {
+	echo "syntax: $PROGNAME [-n] [-p TMPDIR] N FILE..." >&2
+	echo "Will truncate FILE so that only the last N lines in the file remain."  >&2
+	echo "Does nothing if the FILE has less than N lines."  >&2
+	echo ""  >&2
+	echo "The program works by copying the last N lines into a temporary file,"  >&2
+	echo "then replacing the file with the temporary file."  >&2
+	echo "This is NOT an atomic process -- don't use this on log files that are currently"  >&2
+	echo "being written to, or some lines might get lost."  >&2
+	echo ""  >&2
+	echo "By default, the temporary file is created in the same directory as FILE."  >&2
+	echo "Use the -p option to specify a different temporary directory."  >&2
+	echo "" >&2
+	exit 1
+}
+
+filesize () {
+	local opt=
+	if [ -"${1#-}" = "$1" ]; then
+		opt="$1"
+		shift
+	fi
+
+	du -s $opt -- "$1" | cut -f1
+}
+
+dry_run=
+tmpdir=
+while [ "-${1#-}" = "$1" ]; do
+	case "$1" in
+		-h|--help) help ;;
+		-n) dry_run=yes ;;
+		-p) shift ; tmpdir="$1" ;;
+		*) echo "unknown option: $1" >&2 ; exit 1 ;;
+	esac
+	shift
+done
+
+[ -n "$2" ] || help
+
+n_lines="$1"
+shift
+
+if ! [ "$n_lines" -ge 0 ]; then
+	echo "not an acceptable number: '$n_lines'"  >&2
+	exit 1
+fi
+
+err=
+while [ $# -gt 0 ]; do
+	filename="$1"
+
+	if [ ! -f "$1" ]; then
+		echo "not a file: $filename"  >&2
+		err=yes
+		continue
+	fi
+	if [ ! -r "$1" ]; then
+		echo "not readable: $filename"  >&2
+		err=yes
+		continue
+	fi
+	if [ ! -s "$1" ]; then
+		echo "$filename: empty"
+		continue
+	fi
+
+	name="$(basename -- "$filename")"
+	dir="$(dirname -- "$filename")"
+
+	tmpfile="$(mktemp --tmpdir="${tmpdir:-"$dir"}" --suffix="$name")"
+	chown --reference="$filename" -- "$tmpfile" || true
+	chmod --reference="$filename" -- "$tmpfile" || true
+
+	oldsize=$(filesize "$filename")
+	oldsize_h=$(filesize -h "$filename")
+
+	tail -n "$n_lines" -- "$filename" > "$tmpfile"
+
+	newsize=$(filesize "$tmpfile")
+
+	if [ "$oldsize" = "$newsize" ]; then
+		echo "$filename: unchanged"
+		continue
+	fi
+
+	if [ "$dry_run" ]; then
+		newsize_h=$(filesize -h "$tmpfile")
+		echo "$filename: would reduce $oldsize_h → $newsize_h"
+		rm -f -- "$tmpfile"
+	else
+		mv -f -- "$tmpfile" "$filename"
+		newsize_h=$(filesize -h "$filename")
+		echo "$filename: $oldsize_h → $newsize_h"
+	fi
+
+	shift
+done
+
+[ "$err" ] && exit 2
+:
+
