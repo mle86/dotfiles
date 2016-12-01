@@ -30,7 +30,7 @@ is () {
 
 	# No exact match.
 	# Assume $word is all uppercase, convert $input to uppercase too and compare again:
-	input="$(echo "$input" | tr '[:lower:]' '[:upper:]')"
+	input="$(printf '%s\n' "$input" | tr '[:lower:]' '[:upper:]')"
        	[ "$input" = "$word" ]
 }
 
@@ -60,6 +60,6 @@ is_digits () {
 	# grep for any non-digit,
 	# invert search result:
 	local IFS=  # join $* without spaces in between words
-	echo -n "$*" | paste -sdx | grep -qv '[^0-9]'
+	printf '%s' "$*" | paste -sdx | grep -qv '[^0-9]'
 }
 

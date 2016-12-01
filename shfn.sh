@@ -18,7 +18,7 @@ pc () { UL "$@" ; }
 # Runs the command as if there had been no 'z' prefix at all,
 # but prints the $ansi_dark sequence first and the $ansi_reset sequence afterwards.
 # Effectively, it runs the command, but turns its output "dark".
-z () { echo -n "$ansi_dark ($(findcmd "$@")) " ; "$@" ; echo -n "$ansi_reset" ; }
+z () { printf "$ansi_dark (%s) " "$(findcmd "$@")" ; "$@" ; printf "$ansi_reset" ; }
 
 # findcmd command [arguments...]
 # Tries to determine the actual command.
@@ -29,8 +29,8 @@ z () { echo -n "$ansi_dark ($(findcmd "$@")) " ; "$@" ; echo -n "$ansi_reset" ; 
 findcmd () {
 	local first="$1"
 	while [ $# -gt 0 ]; do case "$1" in
-		echo|mv|ln|cp|rm)  echo "$1" ; return ;;
-		git)               echo "$1 $2" ; return ;;
+		echo|mv|ln|cp|rm)  printf '%s\n' "$1" ; return ;;
+		git)               printf '%s\n' "$1 $2" ; return ;;
 		*)  shift ;;
 	esac done
 	echo "$first"
@@ -50,11 +50,10 @@ ask () {
 
 	if [ "$level" -lt 1 ]; then
 		local ps="${ansi_prompt_symbol}•${ansi_reset}"
-		echo ""
-		echo -n "$ps "
+		printf '\n%s ' "$ps"
 	elif [ "$level" -lt 2 ]; then
 		local ps="${ansi_prompt_symbol2}•${ansi_reset}"
-		echo -n " $ps "
+		printf ' %s ' "$ps"
 	fi
 
 	if ! read -p "${prompt} ${ansi_prompt_symbol}>${ansi_reset} " ANSWER; then
@@ -197,7 +196,7 @@ showfile () {
 	if [ -f "$filename" ] && [ ! -s "$filename" ]; then
 		good "Originaldatei $filename ist leer!"
 	else
-		echo " Zeige Originaldatei $(hi $filename):"
+		printf " Zeige Originaldatei %s:\n" "$(hi "$filename")"
 		echo " "
 		cat -- "$filename"  || true
 		echo " "
@@ -216,10 +215,8 @@ showdiff () {
 
 	local diffResult="$( $diffcmd -- "$origFilename" "$newFilename"  || true )"
 	if [ -n "$diffResult" ]; then
-		echo " Zeige Diff zwischen $origFilename und $newFilename:"
-		echo " "
-		echo -n "$diffResult"
-		echo " "
+		printf " Zeige Diff zwischen %s und %s:\n" "$origFilename" "$newFilename"
+		printf ' \n%s \n' "$diffResult"
 	else
 		good "Dateien sind identisch!"
 	fi

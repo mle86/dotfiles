@@ -29,17 +29,17 @@ ask () {
 	local default="$2"
 	local preset="$3"
 
-	echo -n "${ask_promptprefix}${prompt}${ask_promptsuffix}"
+	printf '%s%s%s' "$ask_promptprefix" "$prompt" "$ask_promptsuffix"
 
 	if [ "$preset" = "default" ]; then
 		# $preset was set to "default", use $default as the answer:
 		ANSWER="$default"
-		echo "$ANSWER"
+		printf '%s\n' "$ANSWER"
 
 	elif [ -n "$preset" ]; then
 		# $preset was set, use that value as the answer:
 		ANSWER="$preset"
-		echo "$ANSWER"
+		printf '%s\n' "$ANSWER"
 
 	elif read -r ANSWER; then
 		# Ok, the user hit enter.

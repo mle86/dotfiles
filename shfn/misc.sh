@@ -4,7 +4,7 @@
 #  Removes any trailing slashes in the string, if there are any,
 #  and prints the result.
 remove_trailing_slashes () {
-	echo "$1" | sed 's:/*$::'
+	printf '%s' "$1" | sed 's:/*$::'
 }
 
 # indent [level=2]
@@ -21,7 +21,7 @@ indent () {
 
 	local line=
 	while read -r line; do
-		echo "$level$line"
+		printf '%s\n' "$level$line"
 	done
 }
 
@@ -33,7 +33,7 @@ suffix () {
 	local IFS=' '
 	local line=
 	while read -r line; do
-		echo "$line""$*"
+		printf '%s%s\n' "$line" "$*"
 	done
 }
 
@@ -88,7 +88,7 @@ define () {
 "
 
 	if [ "$preserve_newlines" ]; then
-		output="$(cat 2>/dev/null ; echo -n "EOT")" || return
+		output="$(cat 2>/dev/null ; printf "EOT")" || return
 		output="${output%"EOT"}"
 		output="${output%"$br"}"
 	else

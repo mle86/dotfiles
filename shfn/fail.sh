@@ -4,7 +4,7 @@
 # err errorMessage...
 #  Prints the errorMessage on stderr.
 err () {
-	echo "$@" >&2
+	printf '%s\n' "$*" >&2
 }
 
 # fail [exitStatus=1] errorMessage
@@ -17,7 +17,7 @@ fail () {
 		shift
 	fi
 
-	err "$@"
+	err "$*"
 	exit "$exitStatus"
 }
 
