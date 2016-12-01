@@ -93,7 +93,7 @@ typo_alias ivm   vim
 
 tf () {
 	[ -n "$1" ] || set -- '/var/log/syslog'
-	tail -n0 -f "$@"
+	tail -n10 -f "$@"
 }
 
 lastpow () {
