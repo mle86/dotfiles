@@ -7,6 +7,7 @@ set -e
 ask_symlink ".gitconfig" "gitconfig"
 ask_symlink ".inputrc" "inputrc"
 ask_symlink ".bash_aliases" "bash_aliases.sh"
+ask_symlink ".rest_fn.sh" "rest_fn.sh"
 ask_symlink ".templates" "templates/"
 
 while true; do

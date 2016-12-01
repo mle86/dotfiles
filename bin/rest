@@ -1,0 +1,119 @@
+#!/bin/sh
+# mle 2016-11-09
+set -e
+PROGNAME=$(basename -- "$0")
+
+MAX_HEADERS=20
+
+c0='[0m'
+c_error='[1;31m'
+c_status='[1;30m'
+c_http_success='[1;32m'
+c_http_redirection='[1;33m'
+c_http_informational=$c_http_redirection
+c_http_client_error=$c_error
+c_http_server_error='[1;38;5;207m'
+c_http_other='[1;48;5;196;38;5;16m'
+
+extra_options=
+o=0
+add_extra_option () {
+	while [ $# -gt 0 ]; do
+		varname="_xo_${o}"
+		o=$((o + 1))
+
+		extra_options="$extra_options \"\$$varname\""
+		eval "${varname}=\"\$1\""
+		shift
+	done
+}
+
+while [ $# -gt 0 ]; do
+	[ "-${1#-}" = "$1" ] || break
+	add_extra_option "$1" ; shift
+done
+
+if [ $# -lt 2 ]; then
+	echo "$PROGNAME [-OPTIONS…] METHOD URL [JSONDATA]"  >&2
+	echo "$PROGNAME [-OPTIONS…] METHOD URL @JSONDATAFILENAME"  >&2
+	echo ""  >&2
+	exit 1
+fi
+
+method="$1"
+url="$2"
+data="$3"
+
+if [ $# -gt 3 ]; then
+	echo "$PROGNAME: too many arguments, $(($# - 3)) ignored" >&2
+fi
+
+outputfile="$(mktemp)"
+output=
+info=
+errst=0
+
+if [ -n "$MY_REST_AUTH_DATA" ]; then
+	add_extra_option --user "$MY_REST_AUTH_DATA"
+fi
+for hidx in $(seq 1 $MAX_HEADERS); do
+	v_key="MY_REST_HEADER_$hidx"
+	v_value="MY_REST_HEADER_VALUE_$hidx"
+	eval "[ -n \"\$$v_key\" ] && add_extra_option -H \"\$$v_key: \$$v_value\" || true"
+done
+
+curlcall () { eval "curl \
+	--header 'Content-type: application/json'	\
+	--silent --show-error				\
+	--output \"\$outputfile\"			\
+	-v						\
+	-X \"\$method\"					\
+	--data \"\$data\"				\
+	$extra_options					\
+	\"\$url\" ; "
+}
+
+if info="$(curlcall 2>&1)"; then
+
+	code="$(printf '%s' "$info" | grep '< HTTP/' || true)"
+	headers="$(printf '%s' "$info" | grep -v '< HTTP/' | grep '^< '  || true)"
+
+	# show colored http status on stderr:
+	case "$code" in
+		*" 1"??" "*)  echo "${c_http_informational}${code}${c0}" >&2 ;;
+		*" 2"??" "*)  echo "${c_http_success}${code}${c0}" >&2 ;;
+		*" 3"??" "*)  echo "${c_http_redirection}${code}${c0}" >&2 ;;
+		*" 4"??" "*)  echo "${c_http_client_error}${code}${c0}" >&2 ;;
+		*" 5"??" "*)  echo "${c_http_server_error}${code}${c0}" >&2 ;;
+		"")           echo "${c_http_other}(No status line!)${c0}" >&2 ;;
+		*)            echo "${c_http_other}${code}${c0}" >&2 ;;
+	esac
+
+	# cut last empty header line:
+	headers="${headers%""}"
+	headers="${headers%"< "}"
+
+	# show greyed-out http response headers on stderr:
+	printf "${c_status}%s${c0}" "$headers" >&2
+
+	# add a trailing linebreak if the headers don't have one:
+	[ "$headers" != "" ] && [ "$(printf '%s' "$headers" | tail -c 1)" != "" ] && echo "" >&2
+
+	# show response body on stdout:
+	cat -- "$outputfile"
+
+	# add a trailing linebreak if the output does not contain one:
+	[ -s "$outputfile" ] && [ "$(tail -c 1 -- "$outputfile")" != "" ] && echo ""
+
+else
+	errst="$?"
+
+	# show the error message, but not the connection stuff:
+	printf "$c_error"
+	printf '%s' "$info" | grep -v '^[*>}]'
+	printf "$c0"
+fi
+
+rm -f -- "$outputfile"
+exit "$errst"
+
