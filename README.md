@@ -99,6 +99,20 @@ It contains small shell and Perl scripts.
 			don't report mode/ownership problems.
 	* *-v*, *--verbose*: Report every copied file.
 
+* **[rest](bin/rest):**  
+	A tiny *curl* wrapper for REST API tests.
+	Also see the *rest_auth* and *rest_header* aliases in [rest_fn.sh](rest_fn.sh).  
+	Has colored output
+	(HTTP headers: dark grey;
+	 HTTP status: 2xx green, 4xx red, 5xx purple, 3xx/1xx yellow, else red bg).
+	Only the response body goes to *stdout*,
+	everything else (error messages or HTTP status and headers) goes to *stderr*,
+	so the response body can be redirected or piped to, say, `jq .`
+	without any syntax issues.  
+	Syntax:
+	* `rest [-OPTIONS...] METHOD URL [JSONDATA]`
+	* `rest [-OPTIONS...] METHOD URL @JSONDATAFILENAME`
+
 * **[ts](bin/ts):**  
 	Prints the current UNIX timestamp.  
 	This only reason for this not to be a one-line shell alias
@@ -139,6 +153,30 @@ It contains small shell and Perl scripts.
 	Creates a new file from a template in *[~/.templates/](templates/)*, then opens it with vim.  
 	Existing files will simply be opened, not overwritten.  
 	Syntax: `T [FILENAME=test.sh]`
+
+
+## The REST API toolkit aliases in [.rest\_fn.sh](rest_fn.sh)
+
+* **rest\_auth:**
+	Sets HTTP Basic Auth data for [rest](bin/rest) calls.
+	Writes to the *$MY_REST_AUTH_DATA* env var
+	(which is not exactly well-hidden),
+	so it will last until the current shell is closed.  
+	Syntax:
+	* `rest_auth USERNAME:PASSWORD` (to set)
+	* `rest_auth` (to view)
+	* `rest_auth -` (to clear)
+
+* **rest\_header:**
+	Sets HTTP Basic Auth data for [rest](bin/rest) calls.
+	Operates on the *$MY_REST_HEADER_$n*
+	and *$MY_REST_HEADER_VALUE_$n*
+	env vars,
+	so the effect will last until the current shell is closed.  
+	Syntax:
+	* `rest_header HEADERNAME HEADERVALUE` (to set/overwrite one header)
+	* `rest_header HEADERNAME` (to clear one header)
+	* `rest_header` (to view all set headers)
 
 
 ## [shfn/](shfn/)
