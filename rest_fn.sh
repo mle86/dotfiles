@@ -29,6 +29,9 @@ rest_auth () {
 			return 0 ;;
 		*":"*)
 			export MY_REST_AUTH_DATA="$setto"
+			if [ -z "$IGNOREEOF" ] || [ "$IGNOREEOF" -eq 0 ]; then
+				IGNOREEOF=1
+			fi
 			return 0 ;;
 		*)
 			printf "$usage\n"  >&2
