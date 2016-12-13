@@ -58,6 +58,7 @@ _setgitprompt () {
 
 	local symbol_color='\[[1;38;5;226m\]'
 	local symbol_err_color='\[[1;38;5;208m\]'
+	local symbol_rest_color='\[[1;38;5;49m\]'
 	local stash_symbol_color='\[[0;38;5;239m\]'
 	local info_color='\[[0;38;5;226m\]'
 #	local user_color='\[[0;38;5;256m\]'
@@ -87,10 +88,13 @@ _setgitprompt () {
 
 	local prefix_color="$symbol_color"
 	local suffix_color="$symbol_color"
+
 	[ "$errstate" -ne 0 -a "$errstate" -ne 130 ] && \
 		suffix_color=$symbol_err_color
 		# last command returned something else than zero or 130 (killed by SIGINT)
 
+	[ -n "$MY_REST_AUTH_DATA" ] && \
+		prefix_color=$symbol_rest_color
 
 	if [ -n "$stashes" ]; then stashes="${stash_symbol_color}▮" #×"
 	else                       stashes=" " ; fi
