@@ -228,6 +228,45 @@ o () {
 
 alias iws='sudo iwlist scan'
 
+# pg [-GREPOPTION...] [--] [TERM...]
+#  Calls `ps -ef' and filters its output,
+#  showing only lines that contain one of the TERMs.
+#  Without arguments, it's just a `ps -ef' shortcut.
+pg () {
+	local grepopts=
+	local g=0
+	local pscmd="ps -ef"
+
+	if [ $# -eq 0 ]; then
+		$pscmd
+		return
+	fi
+
+	while [ $# -gt 0 ]; do
+		if [ "$1" = "--" ]; then
+			shift
+			break
+		elif [ "-${1#-}" != "$1" ]; then
+			break
+		else
+			eval "local _grepopt_$g=\"\$1\""
+			grepopts="$grepopts \"\$_grepopt_$g\""
+			g=$((g + 1))
+			shift
+		fi
+	done
+
+	while [ $# -gt 0 ]; do
+		eval "local _grepopt_$g=\"\$1\""
+		grepopts="$grepopts -e \"\$_grepopt_$g\""
+		g=$((g + 1))
+		shift
+	done
+
+	$pscmd | eval "grep $grepopts"
+}
+
+
 
 ###  Farben:  ####################################################
 
