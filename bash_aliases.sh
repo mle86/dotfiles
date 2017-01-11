@@ -61,6 +61,7 @@ cd () {
 alias '..'='command cd ..'
 alias '...'='command cd ../..'
 alias -- '-'='command cd - >/dev/null'
+alias d='cd ~/Desktop/'
 
 alias shlvl='echo $SHLVL'
 alias keep='IGNOREEOF=99'
