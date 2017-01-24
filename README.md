@@ -29,6 +29,12 @@ and running `make && make install` on them.
 This is my `~/bin/` directory.
 It contains small shell and Perl scripts.
 
+* **[countdown](bin/countdown):**  
+	A Perl script for console countdowns.
+	Takes an interval argument like "*5m 20s*".
+	Uses *notify-send* to send a desktop notification when the time is up.  
+	Syntax: `countdown INTERVAL`
+
 * **[ds](bin/ds):**  
 	This is a prettier variant of "*du -sh * | sort*".
 	All it does is list the current directory's contents, summarize their sizes, and sort by size (smallest first).
