@@ -33,7 +33,7 @@ It contains small shell and Perl scripts.
 	A Perl script for console countdowns.
 	Takes an interval argument like "*5m 20s*".
 	Uses *notify-send* to send a desktop notification when the time is up.  
-	Syntax: `countdown INTERVAL`
+	Syntax: `countdown INTERVAL [NAME]`
 
 * **[ds](bin/ds):**  
 	This is a prettier variant of "*du -sh * | sort*".

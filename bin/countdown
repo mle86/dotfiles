@@ -1,10 +1,14 @@
-#!/usr/bin/perl
-
+#!/usr/bin/perl -w
 my $do_notify = 1;
 $| = 1;
 
-our $orig_time = parse_time(shift @ARGV)
-	or die "no time argument";
+if (!@ARGV) {
+	print STDERR "syntax: $0 INTERVAL [NAME]\n\n";
+	exit 1;
+}
+
+our $orig_time = parse_time(shift @ARGV);
+our $name = shift @ARGV;
 our $time = $orig_time;
 
 our $thresh_warn = 2 * 60;
@@ -15,7 +19,7 @@ sub parse_time {
 	my ($h, $m, $s);
 
 	if (!defined($_[0]) || $_[0] eq '') {
-		return undef
+		die "missing time argument";
 	} elsif ($_[0] =~ m/^\s*(?:(?:(\d+):)?(\d+):)?(\d+)\s*$/) {
 		($h, $m, $s) = ($1//0, $2//0, $3//0)
 	} elsif ($_[0] =~ m/(?=.*?(\d+)\s*[Hh])?(?=.*?(\d+)\s*[Mm])?(?=.*?(\d+)\s*[Ss])?(?=.*?(\d+)$)?/) {
@@ -79,7 +83,13 @@ while ($time > 0) {
 }
 
 print color($time) . format_countdown($time);
-system sprintf 'notify-send "%s countdown finished!"', format_time($orig_time)
-	if $do_notify;
+
+my $message = sprintf(((defined $name)
+		? "%s countdown “%s” finished!"
+		: "%s countdown finished!"),
+	format_time($orig_time),
+	$name);
+system('notify-send', $message)  if $do_notify;
+
 print "\n";
 
