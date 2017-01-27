@@ -50,10 +50,11 @@ sub format_time {
 }
 
 sub format_countdown {
-	sprintf "\r %02d:%02d:%02d ",
+	sprintf "\r %02d:%02d:%02d  %s ",
 		($_[0] / 3600),
 		($_[0] % 3600) / 60,
-		($_[0] % 60)
+		($_[0] % 60),
+		$_[1] // ''
 }
 
 sub color {
@@ -71,18 +72,18 @@ sub color {
 
 
 $SIG{INT} = sub {
-	print '[0m' . format_countdown($time) . "^C\n";
+	print '[0m' . format_countdown($time, $name) . "^C\n";
 	exit;
 };
 
 while ($time > 0) {
-	print color($time) . format_countdown($time);
+	print color($time) . format_countdown($time, $name);
 
 	sleep 1;
 	$time--;
 }
 
-print color($time) . format_countdown($time);
+print color($time) . format_countdown($time, $name);
 
 my $message = sprintf(((defined $name)
 		? "%s countdown “%s” finished!"
