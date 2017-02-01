@@ -110,6 +110,11 @@ map <ESC>. .`[
 " Backslash_Enter: easyMotion
 map \<Enter> <Plug>(easymotion-bd-w)
 
+" F1: only gets in the way on the T60, it's right where I expect Escape to be
+noremap  <F1> <ESC>
+cnoremap <F1> <C-C>
+inoremap <F1> <ESC>
+
 
 """""""""""""""""""""
 
