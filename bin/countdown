@@ -85,11 +85,11 @@ while ($time > 0) {
 
 print color($time) . format_countdown($time, $name);
 
-my $message = sprintf(((defined $name)
-		? "%s countdown “%s” finished!"
-		: "%s countdown finished!"),
-	format_time($orig_time),
-	$name);
+my $formatted_orig_time = format_time($orig_time);
+my $message = (defined $name)
+		? "$formatted_orig_time countdown “$name” finished!"
+		: "$formatted_orig_time countdown finished!";
+
 system('notify-send', $message)  if $do_notify;
 
 print "\n";
