@@ -86,11 +86,14 @@ while ($time > 0) {
 print color($time) . format_countdown($time, $name);
 
 my $formatted_orig_time = format_time($orig_time);
+my $icon = 'emblem-urgent';
+my $summary = "Countdown finished";
 my $message = (defined $name)
-		? "$formatted_orig_time countdown “$name” finished!"
-		: "$formatted_orig_time countdown finished!";
+		? "<b>$formatted_orig_time</b> countdown “<b>$name</b>” finished!"
+		: "<b>$formatted_orig_time</b> countdown finished!";
+my @args = ('-i', $icon, $summary, $message);
 
-system('notify-send', $message)  if $do_notify;
+system('notify-send', @args)  if $do_notify;
 
 print "\n";
 
