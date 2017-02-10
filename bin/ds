@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 # mle 2016-03
+use locale;
 
 if (defined $ARGV[0]) {
 	chdir(shift @ARGV)
@@ -7,6 +8,7 @@ if (defined $ARGV[0]) {
 }
 
 my $do_colors = (-t STDOUT);
+my $suffixes = 'KMGTP';
 my %color = (
 	'dir'		=> '[1;34m',
 	'backup'	=> '[38;5;247m',
@@ -39,6 +41,15 @@ foreach (@lines) {
 
 	# padding:
 	$size = ' ' . $size  if (length $size < 4);
+
+	# in some cases, "du" will print a 4-digit size (like 1020K or 1020M) which looks ugly in the list.
+	# we don't need that kind of precision:
+	if (length $size == 5 && m/^[\d,\.]+([A-Z])/i) {
+		if ($suffixes =~ m/$1(.)/i) {
+			# set size to 1.0 (using locale dec separator), append next-higher suffix
+			$size = sprintf '%1.1f%s', 1.0, $1;
+		}
+	}
 
 	# colorize size suffix:
 	$size =~ s/([A-Z]+)/$color{$1}$1$color{'sgr0'}/i  if $do_colors;
