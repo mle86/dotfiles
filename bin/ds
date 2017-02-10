@@ -34,6 +34,9 @@ foreach (@lines) {
 	m/^([\d,\.]+[A-Z]?)(\s+)(.+)$/i or next;
 	my ($size, $sep, $path) = ($1, $2, $3);
 
+	# omit final "." line:
+	next if $path eq '.';
+
 	# padding:
 	$size = ' ' . $size  if (length $size < 4);
 
@@ -42,9 +45,6 @@ foreach (@lines) {
 
 	# insert additional space before si suffix:
 	$size =~ s/([A-Z]|$)/ $1/;
-
-	# omit final "." line:
-	next if $path eq '.';
 
 	# strip leading "./":
 	$path =~ s/^\.\///;
