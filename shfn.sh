@@ -114,6 +114,9 @@ install_symlink () {
 
 	is_absolute_path "$sysFilename"  || sysFilename="$HOME/$sysFilename"
 
+	local sysDirectory="$(dirname -- "$sysFilename")"
+	[ -d "$sysDirectory" ] || z mkdir -vp -- "$sysDirectory"
+
 	if [ -e "$sysFilename" ] || [ -L "$sysFilename" ]; then
 		if resolve_existing_target "$sysFilename" "$pkgFilename"; then
 			# remove existing target, but make a backup
