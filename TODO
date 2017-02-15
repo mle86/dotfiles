@@ -1,4 +1,2 @@
-- "rest_baseurl" script, soll aktiv werden wenn die url mit "/" beginnt
-
 - "rest" default method get?
 

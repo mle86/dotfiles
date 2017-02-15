@@ -80,3 +80,20 @@ rest_header () {
 	fi
 }
 
+rest_baseurl () {
+	local progname='rest_baseurl'
+	local usage="usage: $progname [BASEURL]\nusage: $progname -   (to clear)\n"
+	if [ $# -lt 1 ]; then
+		printf "$usage"  >&2
+		local current="$MY_REST_BASEURL"
+		[ -n "$current" ] && printf '[1;38;5;48m✔[0m Current base url: [1m%s[0m\n' "$current"
+		[ -n "$current" ] || printf '[1;38;5;124m✕[0m Currently no base url set.\n'
+		echo ""
+
+	elif [ "$1" = "-" ]; then
+		unset MY_REST_BASEURL
+	else
+		export MY_REST_BASEURL="${1%"/"}"
+	fi
+}
+

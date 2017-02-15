@@ -44,6 +44,10 @@ method="$1"
 url="$2"
 data="$3"
 
+if [ "/${url#"/"}" = "$url" ]; then
+	url="${MY_REST_BASEURL}${url}"
+fi
+
 if [ $# -gt 3 ]; then
 	echo "$PROGNAME: too many arguments, $(($# - 3)) ignored" >&2
 fi
