@@ -1,5 +1,3 @@
-- "rest" muss curl-Fehler (z.B. "url malformed") auf stderr statt stdout ausgeben
-
 - "rest_baseurl" script, soll aktiv werden wenn die url mit "/" beginnt
 
 - "rest" default method get?

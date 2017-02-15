@@ -109,9 +109,9 @@ else
 	errst="$?"
 
 	# show the error message, but not the connection stuff:
-	printf "$c_error"
-	printf '%s' "$info" | grep -v '^[*>}]'
-	printf "$c0"
+	printf "$c_error"  >&2
+	printf '%s' "$info" | grep -v '^[*>}]'  >&2
+	printf "$c0"  >&2
 fi
 
 rm -f -- "$outputfile"
