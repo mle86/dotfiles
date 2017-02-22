@@ -24,6 +24,7 @@ tags = tag -l
 ci = commit
 ciam = commit --amend
 shw = show
+f = fetch
 
 [push]
 default = simple
