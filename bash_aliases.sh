@@ -266,6 +266,27 @@ pg () {
 	$pscmd | eval "grep $grepopts"
 }
 
+# nx [COMMAND [ARGS...]]
+#  Executes one command, then sends a visible notification.
+#  Useful for wait for the completion of a long-running background task.
+#  Without a COMMAND argument, it sends a notification immediately,
+#  depending on the previous $? value.
+nx () {
+	local status=$?
+
+	if [ $# -gt 0 ]; then
+		status=0
+		( "$@" ) || status=$?
+	fi
+
+	if [ $status -eq 0 ]; then
+		notify-send --icon info "Command finished." "$*"
+	else
+		notify-send --icon important "Command failed!  (status $status)" "$*"
+	fi
+
+	return $status
+}
 
 
 ###  Farben:  ####################################################
