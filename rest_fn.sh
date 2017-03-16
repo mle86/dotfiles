@@ -13,6 +13,7 @@ rest_auth () {
 		[ -n "$current" ] && printf '[1;38;5;48m✔[0m Found rest auth data (username: [1m%s[0m)\n' "$current_username"
 		[ -n "$current" ] || printf '[1;38;5;124m✕[0m Currently no rest auth data set.\n'
 		echo ""
+		[ -n "$current" ] || return 1
 		return 0
 	elif [ $# -eq 1 ]; then
 		setto="$1"
@@ -89,6 +90,7 @@ rest_baseurl () {
 		[ -n "$current" ] && printf '[1;38;5;48m✔[0m Current base url: [1m%s[0m\n' "$current"
 		[ -n "$current" ] || printf '[1;38;5;124m✕[0m Currently no base url set.\n'
 		echo ""
+		[ -n "$current" ] || false
 
 	elif [ "$1" = "-" ]; then
 		unset MY_REST_BASEURL
