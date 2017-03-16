@@ -1,2 +1,6 @@
 - "rest" default method get?
 
+- doc "nx"
+
+- doc "rest_baseurl"
+
