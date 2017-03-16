@@ -73,8 +73,8 @@ alias c='c99'
 alias gs='git status'
 alias gb='git branch -avv'
 alias ga='git add -p'
-alias gd='git diff --diff-algorithm=minimal'
-alias gdc='git diff --diff-algorithm=minimal --cached'
+alias gd='git diff --diff-algorithm=minimal --find-renames'
+alias gdc='git diff --diff-algorithm=minimal --find-renames --cached'
 alias gco='git checkout'
 
 myip () {
