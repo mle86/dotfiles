@@ -21,6 +21,7 @@ _gitinfo () {
 		if [ -d "$gitdir/rebase-merge/" ]; then
 			# it's an interactive rebase
 			branch=$(git rev-parse  --abbrev-ref "$(cat -- "$gitdir/rebase-merge/head-name")")
+			current_commit=$(git rev-parse  --short "$(cat -- "$gitdir/rebase-merge/stopped-sha")")
 			rebase_commit="$current_commit"
 		elif [ -z "$current_commit" ]; then
 			# it's a fresh repo
