@@ -118,3 +118,5 @@ inoremap <F1> <ESC>
 
 """""""""""""""""""""
 
+autocmd BufRead,BufNewFile *.md set tabstop=4 shiftwidth=4 expandtab 
+
