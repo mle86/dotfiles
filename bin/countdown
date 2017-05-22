@@ -7,13 +7,19 @@ if (!@ARGV) {
 	exit 1;
 }
 
-our $orig_time = parse_time(shift @ARGV);
+our $orig_arg = shift @ARGV;
+our $orig_time = parse_time($orig_arg);
 our $name = shift @ARGV;
 our $time = $orig_time;
 
 our $thresh_warn = 2 * 60;
 our $thresh_urg  = 15;
 
+
+sub set_procname {
+	my ($arg, $rest) = @_;
+	$0 = "countdown $arg (-$rest)";
+}
 
 sub parse_time {
 	my ($h, $m, $s);
@@ -76,7 +82,12 @@ $SIG{INT} = sub {
 	exit;
 };
 
+my $formatted_orig_time = format_time($orig_time);
+
 while ($time > 0) {
+	my $formatted_rest_time = format_time($time);
+	set_procname($formatted_orig_time, $formatted_rest_time);
+
 	print color($time) . format_countdown($time, $name);
 
 	sleep 1;
@@ -85,7 +96,6 @@ while ($time > 0) {
 
 print color($time) . format_countdown($time, $name);
 
-my $formatted_orig_time = format_time($orig_time);
 my $icon = 'emblem-urgent';
 my $summary = "Countdown finished";
 my $message = (defined $name)
