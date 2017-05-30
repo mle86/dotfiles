@@ -15,17 +15,17 @@ ansi_prompt_symbol2="$ansi_dark[1m"  # dark grey
 pc () { UL "$@" ; }
 
 # z command [arguments...]
-# Runs the command as if there had been no 'z' prefix at all,
-# but prints the $ansi_dark sequence first and the $ansi_reset sequence afterwards.
-# Effectively, it runs the command, but turns its output "dark".
+#  Runs the command as if there had been no 'z' prefix at all,
+#  but prints the $ansi_dark sequence first and the $ansi_reset sequence afterwards.
+#  Effectively, it runs the command, but turns its output "dark".
 z () { printf "$ansi_dark (%s) " "$(findcmd "$@")" ; "$@" ; printf "$ansi_reset" ; }
 
 # findcmd command [arguments...]
-# Tries to determine the actual command.
-# If there's an echo/mv/ln/cp/rm somewhere in "command arguments...",
-# it's printed; if not, $command (the first argument) is printed.
-# This is used in conjunction with z() to obtain the command name,
-# where we don't want to simply print "xargs" for a xargs command line.
+#  Tries to determine the actual command.
+#  If there's an echo/mv/ln/cp/rm somewhere in "command arguments...",
+#  it's printed; if not, $command (the first argument) is printed.
+#  This is used in conjunction with z() to obtain the command name,
+#  where we don't want to simply print "xargs" for a xargs command line.
 findcmd () {
 	local first="$1"
 	while [ $# -gt 0 ]; do case "$1" in
@@ -37,11 +37,11 @@ findcmd () {
 }
 
 # ask PROMPT [DEFAULT [LEVEL]]
-# Shows a prompt and waits for user input.
-# The user input is saved in $ANSWER.
-# If the user input was empty, $ANSWER is set to the DEFAULT argument instead.
-# If LEVEL==0, ask() will print an empty line first ("first-level question");
-# if LEVEL==1, ask() will only indent the prompt with one space ("second-level question").
+#  Shows a prompt and waits for user input.
+#  The user input is saved in $ANSWER.
+#  If the user input was empty, $ANSWER is set to the DEFAULT argument instead.
+#  If LEVEL==0, ask() will print an empty line first ("first-level question");
+#  if LEVEL==1, ask() will only indent the prompt with one space ("second-level question").
 ask () {
 	ANSWER=
 	local prompt="$1"
@@ -67,10 +67,10 @@ ask () {
 }
 
 # ask_symlink sysFilename [pkgFilename=sysFilename [defaultAnswer=n]]
-# Asks whether a symlink (sysFilename, absolute or $HOME-relative) should be created,
-# pointing to a file in the package directory (pkgFilename, relative path only).
-# See install_symlink() for the link creation and conflict resolution details.
-# defaultAnswer must be "y" or "n".
+#  Asks whether a symlink (sysFilename, absolute or $HOME-relative) should be created,
+#  pointing to a file in the package directory (pkgFilename, relative path only).
+#  See install_symlink() for the link creation and conflict resolution details.
+#  defaultAnswer must be "y" or "n".
 ask_symlink () {
 	local sysFilename="$1"
 	local pkgFilename="${2:-$sysFilename}"
@@ -86,10 +86,10 @@ ask_symlink () {
 }
 
 # ask_copy sysFilename [pkgFilename=sysFilename [defaultAnswer=n]]
-# Asks whether a file in the repo (pkgFilename, relative path only)
-# should be copied to its sysFilename location (absolute path only).
-# See install_copy() for the copying and conflict resolution details.
-# defaultAnswer must by "y" or "n".
+#  Asks whether a file in the repo (pkgFilename, relative path only)
+#  should be copied to its sysFilename location (absolute path only).
+#  See install_copy() for the copying and conflict resolution details.
+#  defaultAnswer must by "y" or "n".
 ask_copy () {
 	local sysFilename="$1"
 	local pkgFilename="${2:-$sysFilename}"
@@ -103,11 +103,11 @@ ask_copy () {
 }
 
 # install_symlink sysFilename pkgFilename
-# Tries to create a symlink (sysFilename, absolute or $HOME-relative path)
-# pointing to pkgFilename (package-relative path).
-# If the symlink filename already exists, resolve_existing_target() will be called
-# to ask the user how the conflict should be resolved,
-# possibly skipping the symlinking.
+#  Tries to create a symlink (sysFilename, absolute or $HOME-relative path)
+#  pointing to pkgFilename (package-relative path).
+#  If the symlink filename already exists, resolve_existing_target() will be called
+#  to ask the user how the conflict should be resolved,
+#  possibly skipping the symlinking.
 install_symlink () {
 	local sysFilename="$1"
 	local pkgFilename="$HERE/$2"
@@ -131,10 +131,10 @@ install_symlink () {
 }
 
 # install_copy sysFilename pkgFilename
-# Tries to copy pkgFilename (package-relative path) to sysFilename (absolute path).
-# If the target filename already exists, resolve_existing_target() will be called
-# to ask the user how the conflict should be resolved,
-# possibly skipping the copying.
+#  Tries to copy pkgFilename (package-relative path) to sysFilename (absolute path).
+#  If the target filename already exists, resolve_existing_target() will be called
+#  to ask the user how the conflict should be resolved,
+#  possibly skipping the copying.
 install_copy () {
 	local sysFilename="$1"
 	local pkgFilename="$HERE/$2"
@@ -159,10 +159,10 @@ install_copy () {
 }
 
 # resolve_existing_target sysFilename pkgFilename
-# Asks the user how a symlinking/copying conflict should be resolved,
-# assuming that the symlink name sysFilename already exists.
-# Returns true if the user wants to overwrite the existing file;
-# returns false if the user wants to keep the existing sysFilename file unchanged.
+#  Asks the user how a symlinking/copying conflict should be resolved,
+#  assuming that the symlink name sysFilename already exists.
+#  Returns true if the user wants to overwrite the existing file;
+#  returns false if the user wants to keep the existing sysFilename file unchanged.
 resolve_existing_target () {
 	local sysFilename="$1"
 	local pkgFilename="$2"
@@ -192,8 +192,8 @@ resolve_existing_target () {
 }
 
 # showfile filename
-# Shows a file's contents with cat.
-# Always succeeds.
+#  Shows a file's contents with cat.
+#  Always succeeds.
 showfile () {
 	local filename="$1"
 	if [ -f "$filename" ] && [ ! -s "$filename" ]; then
@@ -207,9 +207,9 @@ showfile () {
 }
 
 # showdiff origFilename newFilename
-# Shows the diff between two files.
-# Uses colordiff if available.
-# Prints a good() message if the files are identical.
+#  Shows the diff between two files.
+#  Uses colordiff if available.
+#  Prints a good() message if the files are identical.
 showdiff () {
 	local origFilename="$1"
 	local newFilename="$2"
