@@ -1,0 +1,11 @@
+--- gedit.desktop0	2017-05-31 00:00:20.795360801 +0200
++++ /usr/share/applications/gedit.desktop	2017-05-30 12:30:30.642010336 +0200
+@@ -2,7 +2,7 @@
+ Name=gedit
+ GenericName=Text Editor
+ Comment=Edit text files
+-Exec=gedit %U
++Exec=gedit -s %U
+ Terminal=false
+ Type=Application
+ StartupNotify=true

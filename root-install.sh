@@ -25,5 +25,7 @@ done
 # They're supposed to be mostly non-invasive for other users.
 ask_copy "/etc/vim/vimrc.local" "vim/sys-vimrc"
 
+ask_patch "patch/gedit.desktop.patch" "standalone gedit mode"
+
 echo ""
 
