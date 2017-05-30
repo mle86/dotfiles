@@ -29,8 +29,8 @@ z () { printf "$ansi_dark (%s) " "$(findcmd "$@")" ; "$@" ; printf "$ansi_reset"
 findcmd () {
 	local first="$1"
 	while [ $# -gt 0 ]; do case "$1" in
-		echo|mv|ln|cp|rm)  printf '%s\n' "$1" ; return ;;
-		git)               printf '%s\n' "$1 $2" ; return ;;
+		echo|mv|ln|cp|rm|patch)  printf '%s\n' "$1" ; return ;;
+		git)                     printf '%s\n' "$1 $2" ; return ;;
 		*)  shift ;;
 	esac done
 	echo "$first"
@@ -100,6 +100,34 @@ ask_copy () {
 	ask "Installiere $(hi $sysFilename) ← $pkgFilename? $options" "$defaultAnswer"
 
 	is_yes && install_copy "$sysFilename" "$pkgFilename"  || true
+}
+
+# ask_patch patchFilename [explanation [defaultAnswer=n]]
+#  Asks whether a patch (patchFilename, package-relative path only) should be applied.
+#  See apply_patch().
+#  defaultAnswer must by "y" or "n".
+ask_patch () {
+	local patchFilename="$1"
+	local explanation="${2:+"($2) "}"
+	local defaultAnswer="${3:-n}"
+
+	[ "$defaultAnswer" = "y" ] && local options='[Y/n]' || local options='[y/N]'
+
+	ask "Patch $(hi $patchFilename)? $explanation$options" "$defaultAnswer"
+
+	is_yes && apply_patch "$patchFilename"  || true
+}
+
+# apply_patch patchFilename [targetFilename]
+#  Tries to apply a patch (patchFilename, package-relative path)
+#  against targetFilenane (absolute path) or the patch's default target file.
+#  Will not create reject files if the patch doesn't match,
+#  and it will not reverse the patch.
+apply_patch () {
+	local patchFilename="$HERE/$1"
+	local targetFile="$2"
+
+	z patch --forward --directory=/ --reject-file=- -p0 -- $targetFile <"$patchFilename"
 }
 
 # install_symlink sysFilename pkgFilename
