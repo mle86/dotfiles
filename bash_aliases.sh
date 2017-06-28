@@ -215,9 +215,6 @@ T () {
 	return $vimstatus
 }
 
-# https://gist.github.com/mwhite/6887990#gistcomment-1870225
-alias gcl='git checkout @{-1}'
-
 o () {
 	[ $# -lt 1 ] && set -- "."
 	while [ $# -gt 0 ]; do
