@@ -108,7 +108,7 @@ _setgitprompt () {
 	# show current path in terminal headline:
 	case "$TERM" in
 	xterm*|rxvt*)
-		# print term title info directly on terminal, does not count towards prompot length, cannot use \w:
+		# print term title info directly on terminal, does not count towards prompt length, cannot use \w:
 #		echo -n "]0;:" ; pwd ; echo -ne "\a"
 
 		# or include term title info in prompt output, needs \[ escaping for prompt length, can use \w:
