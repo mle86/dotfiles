@@ -19,9 +19,9 @@ if [ "$1" = "-n" ]; then
 	shift
 fi
 
-n=$1
+N=$1
 shift
-if [ "$n" -lt 1 ]; then
+if [ "$N" -lt 1 ]; then
 	echo "$PROGNAME: N cannot be lower than 1" >&2
 	exit 2
 fi
