@@ -76,6 +76,7 @@ alias ga='git add -p'
 alias gd='git diff --diff-algorithm=minimal --find-renames'
 alias gdc='git diff --diff-algorithm=minimal --find-renames --cached'
 alias gco='git checkout'
+alias grc='git rebase --continue'
 
 myip () {
 	( ip addr show dev eth0 ; ip addr show dev wlan0 ) | \
