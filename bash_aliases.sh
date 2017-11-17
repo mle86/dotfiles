@@ -75,8 +75,27 @@ alias gb='git branch -avv'
 alias ga='git add -p'
 alias gd='git diff --diff-algorithm=minimal --find-renames'
 alias gdc='git diff --diff-algorithm=minimal --find-renames --cached'
-alias gco='git checkout'
 alias grc='git rebase --continue'
+
+gco () {
+	# reverse gitprompt's branch name shortening:
+	local _a=0 args=
+	while [ $# -gt 0 ]; do
+		local v="$1" ; shift
+		if   [ "f-${v#f-}" = "$v" ]; then v="feature-${v#f-}"
+		elif [ "r-${v#r-}" = "$v" ]; then v="release-${v#r-}"
+		elif [ "H-${v#H-}" = "$v" ]; then v="hotfix-${v#H-}"
+		elif [ "f/${v#f/}" = "$v" ]; then v="feature/${v#f/}"
+		elif [ "r/${v#r/}" = "$v" ]; then v="release/${v#r/}"
+		elif [ "H/${v#H/}" = "$v" ]; then v="hotfix/${v#H/}"
+		elif [ "mst"       = "$v" ]; then v="master"
+		fi
+		eval "local a${_a}=\"\$v\""
+		args="$args \"\$a${_a}\""
+		_a=$((_a + 1))
+	done
+	eval git checkout $args
+}
 
 myip () {
 	( ip addr show dev eth0 ; ip addr show dev wlan0 ) | \
