@@ -62,6 +62,7 @@ alias '..'='command cd ..'
 alias '...'='command cd ../..'
 alias -- '-'='command cd - >/dev/null'
 alias d='cd ~/Schreibtisch/ 2>/dev/null || cd ~/Desktop/'
+alias n='cd ~/Downloads/'
 
 alias shlvl='echo $SHLVL'
 alias keep='IGNOREEOF=99'
