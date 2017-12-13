@@ -89,6 +89,7 @@ gco () {
 		elif [ "f/${v#f/}" = "$v" ]; then v="feature/${v#f/}"
 		elif [ "r/${v#r/}" = "$v" ]; then v="release/${v#r/}"
 		elif [ "H/${v#H/}" = "$v" ]; then v="hotfix/${v#H/}"
+		elif [ "dev"       = "$v" ]; then v="develop"
 		elif [ "mst"       = "$v" ]; then v="master"
 		fi
 		eval "local a${_a}=\"\$v\""

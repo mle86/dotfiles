@@ -120,6 +120,7 @@ _setgitprompt () {
 _shorten_git_branch () {
 	case "$1" in
 		master)		echo "mst" ;;
+		develop)	echo "dev" ;;
 		hotfix/*)	echo "H/${1#*/}" ;;
 		release/*)	echo "r/${1#*/}" ;;
 		feature/*)	echo "f/${1#*/}" ;;
