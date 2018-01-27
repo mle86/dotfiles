@@ -18,6 +18,9 @@ while true; do
 done
 
 ask_symlink ".vimrc" "vim/vimrc"
+if is_yes; then
+	echo "\$ git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim && vim +PluginInstall +qall"
+fi
 
 while true; do
 	ask "Sollen die Vim-Farben nach $(hi .vim/colors) gesymlinkt werden? [y/N/$(pc l)ist]" 'n'
