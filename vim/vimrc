@@ -1,5 +1,9 @@
 "" Vim_settings:  """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" portable .vimrc file:
+set encoding=utf-8
+scriptencoding utf-8
+
 set nocompatible
 
 " don't remove indentation on #-lines:
