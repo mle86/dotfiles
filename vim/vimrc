@@ -41,6 +41,8 @@ set ignorecase
 " ...if the search pattern contains upper case chars.
 set smartcase
 
+set cryptmethod=blowfish2
+
 
 
 "" Load_Plugins:  """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
