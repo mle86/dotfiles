@@ -83,7 +83,7 @@ hi LineNr ctermfg=0 ctermbg=0 cterm=bold
 " vim.wikia.com/wiki/Highlight_unwanted_spaces
 set list
 set listchars=tab:\ \ ,trail:⚬,nbsp:⎵
-highlight ExtraWhitespace ctermfg=237 guifg=237
+highlight ExtraWhitespace ctermfg=237
 match ExtraWhitespace /\s\+$/
 
 " custom color scheme for PHP:
