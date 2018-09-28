@@ -171,7 +171,7 @@ dx () {
 	if [ -z "$1" ] || [ "$1" = "-a" ]; then
 		echo "usage: dx CONTAINERNAME [COMMAND=$SHELL]"  >&2
 		echo ""  >&2
-		docker ps $1  >&2
+		docker ps $1
 		return 9
 	fi
 
