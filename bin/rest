@@ -28,6 +28,25 @@ add_extra_option () {
 	done
 }
 
+fmt_headers () {
+	printf "${c_status}"
+	cat
+	printf "${c0}"
+}
+
+fmt_status () {
+	local response="$1"
+	case "$response" in
+		*" 1"??" "*)  echo "${c_http_informational}${response}${c0}" ;;
+		*" 2"??" "*)  echo "${c_http_success}${response}${c0}" ;;
+		*" 3"??" "*)  echo "${c_http_redirection}${response}${c0}" ;;
+		*" 4"??" "*)  echo "${c_http_client_error}${response}${c0}" ;;
+		*" 5"??" "*)  echo "${c_http_server_error}${response}${c0}" ;;
+		"")           echo "${c_http_other}(No status line!)${c0}" ;;
+		*)            echo "${c_http_other}${response}${c0}" ;;
+	esac
+}
+
 while [ $# -gt 0 ]; do
 	[ "-${1#-}" = "$1" ] || break
 	add_extra_option "$1" ; shift
@@ -83,22 +102,14 @@ if info="$(curlcall 2>&1)"; then
 	headers="$(printf '%s' "$info" | grep -v '< HTTP/' | grep '^< '  || true)"
 
 	# show colored http status on stderr:
-	case "$code" in
-		*" 1"??" "*)  echo "${c_http_informational}${code}${c0}" >&2 ;;
-		*" 2"??" "*)  echo "${c_http_success}${code}${c0}" >&2 ;;
-		*" 3"??" "*)  echo "${c_http_redirection}${code}${c0}" >&2 ;;
-		*" 4"??" "*)  echo "${c_http_client_error}${code}${c0}" >&2 ;;
-		*" 5"??" "*)  echo "${c_http_server_error}${code}${c0}" >&2 ;;
-		"")           echo "${c_http_other}(No status line!)${c0}" >&2 ;;
-		*)            echo "${c_http_other}${code}${c0}" >&2 ;;
-	esac
+	fmt_status "$code" >&2
 
 	# cut last empty header line:
 	headers="${headers%""}"
 	headers="${headers%"< "}"
 
 	# show greyed-out http response headers on stderr:
-	printf "${c_status}%s${c0}" "$headers" >&2
+	printf '%s' "$headers" | fmt_headers >&2
 
 	# add a trailing linebreak if the headers don't have one:
 	[ "$headers" != "" ] && [ "$(printf '%s' "$headers" | tail -c 1)" != "" ] && echo "" >&2
