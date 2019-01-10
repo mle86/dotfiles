@@ -33,6 +33,7 @@ fmt_headers () {
 	local key value
 	local IFS=':'
 	while read -r key value; do
+		[ -n "$key" ] || continue
 		printf "${c_status}%s%s${c0}\n" "$key" "${value:+":${c_status_value}$value"}"
 	done
 }
@@ -112,10 +113,7 @@ if info="$(curlcall 2>&1)"; then
 	headers="${headers%"< "}"
 
 	# show greyed-out http response headers on stderr:
-	printf '%s' "$headers" | fmt_headers >&2
-
-	# add a trailing linebreak if the headers don't have one:
-	[ "$headers" != "" ] && [ "$(printf '%s' "$headers" | tail -c 1)" != "" ] && echo "" >&2
+	printf '%s\n' "$headers" | fmt_headers >&2
 
 	# show response body on stdout:
 	cat -- "$outputfile"
