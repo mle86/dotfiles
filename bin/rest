@@ -7,7 +7,8 @@ MAX_HEADERS=20
 
 c0='[0m'
 c_error='[1;31m'
-c_status='[1;30m'
+c_status='[1;38;5;241m'
+c_status_value='[0;38;5;245m'
 c_http_success='[1;32m'
 c_http_redirection='[1;33m'
 c_http_informational=$c_http_redirection
@@ -29,9 +30,11 @@ add_extra_option () {
 }
 
 fmt_headers () {
-	printf "${c_status}"
-	cat
-	printf "${c0}"
+	local key value
+	local IFS=':'
+	while read -r key value; do
+		printf "${c_status}%s%s${c0}\n" "$key" "${value:+":${c_status_value}$value"}"
+	done
 }
 
 fmt_status () {
