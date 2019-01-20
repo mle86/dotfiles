@@ -1,0 +1,160 @@
+#!/bin/bash
+
+## init: ###############################
+
+set -e
+export LANG=C  # without this, sort(1) might confuse ' ' and '_'!
+
+consumer_key=
+consumer_secret=
+method=
+url=
+
+MAIN () {
+	find_rest_args "$@"
+	find_auth_data "$MY_REST_AUTH_DATA"
+	export MY_REST_AUTH_DATA=  # don't add our auth data as HTTP Basic!!
+
+	local preauthparams="$(preauthparams)"
+	local basestr="$(basestr "$method" "$url" "$preauthparams")"
+	local signature="$(printf '%s' "$basestr" | sign "$(hmac_key)")"
+	local authheader="$(authheader "$preauthparams" "$signature")"
+
+	exec rest -H"$authheader" "$@"  # !
+}
+
+
+## helper functions: ###################
+
+rawrnd () { dd if=/dev/urandom bs=1 count="$1" 2>/dev/null ; }
+dgst   () { openssl dgst "$@" -r -binary | xxd -p | paste -sd "" ; }
+dgst64 () { openssl dgst "$@" -r -binary | base64 ; }
+ts     () { date '+%s' ; }
+
+_LAST_NONCE=
+nonce      () { _LAST_NONCE="$(rawrnd 8 | dgst -sha1)"; printf '%s\n' "$_LAST_NONCE"; }
+last_nonce () { if [ -n "$_LAST_NONCE" ]; then printf '%s\n' "$_LAST_NONCE"; else nonce; fi; }
+
+urlencode () { perl -pe 's/([^a-zA-Z0-9_\-\.])/sprintf "%%%02X", ord $1/ge'; }
+hmac_key  () { printf '%s&%s' "$(v urlencode "$consumer_secret")" ""; }
+sign      () { dgst64 -sha1 -hmac "$1"; }
+
+v () { local cmd="$1" ; shift ; printf '%s' "$*" | "$cmd" ; }
+
+err () { printf '%s\n' "$*" >&2 ; }
+fail () {
+	local exitStatus=1
+	if [ -n "$2" ]; then
+		exitStatus="$1"
+		shift
+	fi
+
+	err "$*"
+	exit "$exitStatus"
+}
+
+find_rest_args () {
+	while [ $# -gt 0 ] && [ "-${1#-}" = "$1" ]; do
+		shift  # skip option arguments
+	done
+
+	method="$1"
+	url="$2"
+
+	[ -z "$method" ] && fail "no HTTP method!"
+	[ -z "$url" ] && fail "no url!"
+
+	if [ "/${url#/}" = "$url" ] && [ -n "$MY_REST_BASEURL" ] ; then  # relative url
+		url="${MY_REST_BASEURL}${url}"
+	fi
+}
+
+find_auth_data () {
+	[ -z "$MY_REST_AUTH_DATA" ] && fail "no rest auth data set!"
+
+	consumer_key="${MY_REST_AUTH_DATA%%":"*}"
+	consumer_secret="${MY_REST_AUTH_DATA#*":"}"
+
+	if [ -z "$consumer_key" ] || [ -z "$consumer_secret" ]; then
+		fail "invalid auth data set!  need <consumer_key>:<consumer_secret>"
+	fi
+}
+
+
+## oauth functions: ####################
+
+preauthparams () {
+	printf 'oauth_consumer_key %s\n'	"$(v urlencode "$consumer_key")"
+	printf 'oauth_nonce %s\n'		"$(v urlencode $(nonce))"
+	printf 'oauth_signature_method %s\n'	"HMAC-SHA1"
+	printf 'oauth_timestamp %s\n'		"$(ts)"
+	printf 'oauth_version %s\n'		"1.0"
+}
+
+basestr () {
+	local http_method="$1"
+	local orig_url="$2"
+	local short_url="${orig_url%%'?'*}"
+	local auth_params="$3"
+	local params=
+
+	while read -r an av ; do
+		params="$params""$(printf '\n%s=%s' "$an" "$av")"
+	done <<< "$auth_params"
+
+	# TODO: if content-type=www-formdata, add POST values to $params
+
+	case "$orig_url" in
+	*"?"*)
+		local orig_query="${orig_url#*'?'}"
+		local IFS='&'
+		for qp in $orig_query; do
+			local qn="${qp%%"="*}"
+			local qv="${qp#*"="}"
+			params="$params""$(printf '\n%s=%s' "$qn" "$(v urlencode "$qv")")"
+		done
+		;;
+	esac
+
+	# remove empty params:
+	params="$(printf '%s' "$params" | perl -ne 'print unless m/^[^=]+=$/')"
+	# sort params:
+	params="$(printf '%s' "$params" | sort)"
+	# concatenate params:
+	params="$(printf '%s' "$params" | paste -sd '&')"
+	# strip:
+	params="${params#'&'}"
+
+	printf '%s&%s&%s' "${http_method^^}" "$(v urlencode "$short_url")" "$(v urlencode "$params")"
+}
+
+authheader () {
+	local preauthparams="$1"
+	local signature="$2"
+	local realm="$3"
+	local first=yes
+
+	printf 'Authorization: OAuth '
+
+	if [ -n "$realm" ]; then
+		printf 'realm="%s"' "$(v urlencode "$realm")"
+		first=
+	fi
+
+	# add oauth_signature param:
+	local params="${preauthparams}""$(printf '\noauth_signature %s' "$(v urlencode "$signature")")"
+	# sort params:
+	params="$(printf '%s' "$params" | sort)"
+
+	while read -r an av; do
+		[ "$first" ] || printf ', '
+		first=
+		printf '%s="%s"' "$an" "$av"
+	done <<< "$params"
+}
+
+
+## main call: ##########################
+
+MAIN "$@"
+
