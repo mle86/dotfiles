@@ -121,12 +121,27 @@ tf () {
 
 lastpow () {
 	[ -n "$1" ] || set -- '/var/log/auth.log'
+	local line= brk='
+'
+	local color_on='[1;32m' color_off='[1;31m'
+	local color_open='[38;2;169;205;134m' color_close='[38;2;222;135;135m' c0='[0m'
 	zgrep \
 		-e 'New seat seat0.'		\
 		-e 'System is powering down.'	\
 		-e 'Lid opened.'		\
 		-e 'Lid closed.'		\
-		-a "$@"
+		-a "$@" | \
+	while read -r line; do
+		! [ -t 1 ] && printf '%s\n' "$line" && continue
+		local prefix= suffix=
+		case "$line" in
+			*"New seat"*)      prefix="$color_on" ; suffix="$c0" ;;
+			*"powering down"*) prefix="$color_off" ; suffix="$c0$brk" ;;
+			*"Lid opened"*)    prefix="$color_open" ; suffix="$c0" ;;
+			*"Lid closed"*)    prefix="$color_close" ; suffix="$c0" ;;
+		esac
+		printf '%s%s%s\n' "$prefix" "$line" "$suffix"
+	done
 }
 
 todo () {
