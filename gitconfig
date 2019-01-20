@@ -5,7 +5,6 @@ name = mle
 email = maximilian@eul.cc
 
 [core]
-autocrlf = input
 
 [color]
 ui = auto
