@@ -100,7 +100,8 @@ gco () {
 }
 
 myip () {
-	( ip addr show dev eth0 ; ip addr show dev wlan0 ) | \
+	local dev= devs='eth0 wlan0 enp0s31f6 wlp61s0 enp0s25 wlp4s0'
+	( for dev in $devs; do ip addr show dev $dev 2>/dev/null; done ) | \
 		grep -e 'inet ' -e 'inet6' |\
 		grep -P '(?<!brd) [0-9a-f]+[:\.][0-9a-f:\.]+'
 	curl https://ip.eul.cc/
