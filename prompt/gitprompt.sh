@@ -57,11 +57,11 @@ _gitinfo () {
 _setgitprompt () {
 	local errstate="$?"
 
-	local symbol_color='\[[1;38;5;226m\]'
+	local symbol_color='\[[1;38;5;190m\]'  # 226
 	local symbol_err_color='\[[1;38;5;208m\]'
 	local symbol_rest_color='\[[1;38;5;49m\]'
 	local stash_symbol_color='\[[0;38;5;239m\]'
-	local info_color='\[[0;38;5;226m\]'
+	local info_color='\[[0;38;5;190m\]'
 #	local user_color='\[[0;38;5;256m\]'
 #	local host_color='\[[0;37m\]'
 	local cwd_color='\[[1;37m\]'
