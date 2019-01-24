@@ -40,6 +40,7 @@ fi
 ask "Desktop-Defaults (ini/rc) einspielen? [y/N]" 'n'
 if is_yes; then
 	$HERE/cfg/confpatch.pl -b -i $HOME/.config/SpeedCrunch/SpeedCrunch.conf $HERE/cfg/speedcrunch.patch.ini
+	$HERE/cfg/confpatch.pl -b -i $HOME/.config/vlc/vlcrc                    $HERE/cfg/vlcrc.patch.ini
 fi
 
 ask_symlink "bin/git-color-annotate"
