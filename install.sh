@@ -37,6 +37,11 @@ if is_yes; then
 	$HERE/dconf/dconf.pl $HERE/dconf/*.conf
 fi
 
+ask "Desktop-Defaults (ini/rc) einspielen? [y/N]" 'n'
+if is_yes; then
+	$HERE/cfg/confpatch.pl -b -i $HOME/.config/SpeedCrunch/SpeedCrunch.conf $HERE/cfg/speedcrunch.patch.ini
+fi
+
 ask_symlink "bin/git-color-annotate"
 if is_yes; then
 	ask "Git-Aliases $(hi ann) und $(hi annot) für color-annotate anlegen? [Y/n]"  'y' 1
