@@ -4,3 +4,11 @@
 
 - doc "rest_baseurl"
 
+- Thunderbird cfg:
+	# Default: descending sort
+	mailnews.default_sort_order	2
+	# Default: sort by date
+	mailnews.default_sort_type	18
+	# Default: threaded view
+	default_view_flags		1
+
