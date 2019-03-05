@@ -26,6 +26,8 @@ export PATH="$PATH:$HOME/bin"
 export IBUS_ENABLE_SYNC_MODE=1
   # needed for ibus <1.5.11 to fix this problem: https://youtrack.jetbrains.com/issue/IDEA-78860
 
+export HISTSIZE=8000
+
 
 ###  Abkürzungen:  ###############################################
 
