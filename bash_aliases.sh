@@ -363,7 +363,7 @@ set_ls_colors () {
 	_set_ls_color $video .flc .avi .fli .flv .gl .dl .xcf .xwd .yuv .cgm .emf .axv .anx .ogv .ogx
 	_set_ls_color $audio .aac .au .flac .mid .midi .mka .mp3 .mpc .ogg .ra .wav .axa .oga .spx .xspf
 	_set_ls_color $info README README.md TODO INFO AUTHOR INSTALL CHANGELOG
-	_set_ls_color $backup .bkup .bak ~ .swp
+	_set_ls_color $backup .bkup .bak '~' .swp
 
 	unset -f _set_ls_color
 }
