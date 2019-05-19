@@ -86,9 +86,6 @@ set listchars=tab:\ \ ,trail:⚬,nbsp:⎵
 highlight ExtraWhitespace ctermfg=237
 match ExtraWhitespace /\s\+$/
 
-" custom color scheme for PHP:
-autocmd BufRead,BufNewFile *.php colorscheme mle-php
-
 
 "" Shortcuts:  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -122,7 +119,8 @@ cnoremap <F1> <C-C>
 inoremap <F1> <ESC>
 
 
-"""""""""""""""""""""
+"" Filetype_Specific_Configuration:  """""""""""""""""""""""""""""""""""""""""""
 
-autocmd BufRead,BufNewFile *.md set tabstop=4 shiftwidth=4 expandtab 
+autocmd BufRead,BufNewFile *.md  set softtabstop=4 shiftwidth=4 expandtab
+autocmd BufRead,BufNewFile *.php set softtabstop=4 shiftwidth=4 expandtab | colorscheme mle-php
 
