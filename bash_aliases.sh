@@ -122,6 +122,10 @@ tf () {
 	tail -n10 -f "$@"
 }
 
+tfx () {
+	tf "$@" | hx
+}
+
 lastpow () {
 	[ -n "$1" ] || set -- '/var/log/auth.log'
 	local line= brk='
@@ -362,7 +366,7 @@ set_ls_colors () {
 	_set_ls_color $video .mov .mpg .mpeg .m2v .mkv .ogm .mp4 .m4v .mp4v .vob .qt .nuv .wmv .asf .rm .rmvb
 	_set_ls_color $video .flc .avi .fli .flv .gl .dl .xcf .xwd .yuv .cgm .emf .axv .anx .ogv .ogx
 	_set_ls_color $audio .aac .au .flac .mid .midi .mka .mp3 .mpc .ogg .ra .wav .axa .oga .spx .xspf
-	_set_ls_color $info README README.md TODO INFO AUTHOR INSTALL CHANGELOG
+	_set_ls_color $info README README.md TODO TODO.md INFO AUTHOR INSTALL CHANGELOG
 	_set_ls_color $backup .bkup .bak '~' .swp
 
 	unset -f _set_ls_color
