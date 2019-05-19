@@ -73,6 +73,13 @@ It contains small shell and Perl scripts.
 		This mode is chosen if there are no cmdline arguments
 		and if *stdin* is a file or a pipe (but not a tty).
 
+* **[hx](bin/hx):**  
+        This is a simple syntax highlighter for log files.
+        It supports filename arguments but defaults to reading stdin.
+        It mostly colorizes its input;  the only actual change it does
+        is adding a “●” prefix to every output line
+        to make reading long log lines easier.
+
 * **[keep-n-files](bin/keep-n-files):**  
 	This will remove the oldest files in *DIR* so that only *N* files remain.
 	Alternatively, it can take a list of *FILENAME*s, in which case it will delete the oldest of them until only *N* files remain.
