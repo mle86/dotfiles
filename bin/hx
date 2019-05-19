@@ -1,7 +1,10 @@
 #!/usr/bin/perl
+use strict;
 
 my $c_bold = '[1m';
 my $c_unbold = '[22m';
+my $c_faint = '[2m';
+my $c_unfaint = '[22m';
 my $c0 = '[0m';
 
 #my $c_sym = '[38;5;210m';
@@ -12,12 +15,17 @@ my $c_host = $c_sym;
 my $c_app = $c_sym;
 my $c_loglevel = $c_sym;
 my $c_info = '[38;5;243m';
+#my $c_info_prefix = $c_info;
+my $c_info_prefix = '[38;2;125;117;83m';
 my $c_trace = $c_info;
+my $c_stack = $c_info;
+my $c_stack_msg = $c0;
 my $c_rpt = '[34m';
-my $c_exception_fqcn = $c0;
+my $c_exception_fqcn = $c_unbold;
 my $c_exception_scn  = $c_bold;
 my $c_exception_code = $c_bold;
-my $c_message = '';
+my $c_exception0 = $c_unbold;
+my $c_message = $c0;
 
 my $re_json_number     = '\\s*-?\\d+(?:\\.\\d+)?(?:[eE][\\-\\+]?\\d+)?\\s*';
 my $re_json_const      = '\\s*(?:null|true|false)\\s*';
@@ -26,11 +34,16 @@ my $re_json_array      = "\\s*\\[(?:(?&json)(?:,(?&json))*|\\s*)\\]\\s*";
 my $re_json_object     = "\\s*\\{(?:$re_json_string:(?&json)(?:,$re_json_string:(?&json))*|\\s*)?\\}\\s*";
 my $re_json_top_object = "\\s*\\{(?:$re_json_string:(?&json)(?:,$re_json_string:(?&json))*|\\s*)?\\}\\s*";
 my $re_json            = "(?<json>$re_json_number|$re_json_const|$re_json_string|$re_json_array|$re_json_object)";
-
 my $re_lineno  = '(?::\\d+|\(\d+\)| on line \d+)';
 
+my $re_nsname = '\\\\?(?:[A-Za-z]\w*\\\\)+';
+my $re_classname = "(?:$re_nsname)?[A-Za-z]\\w+";
+my $re_fnname = '(?:[A-Za-z_]\\w*|\\{closure\\})';
+my $re_fnprefix = '(?:->|::)';
+my $re_fncall = "(?<class>${re_nsname}(?=\{)|${re_classname}(?=${re_fnprefix})|${re_classname}::${re_nsname})?(?<fnp>${re_fnprefix})?(?<fn>${re_fnname})(?<args> ?\\(.*\\))";
+
 my $re_fqcn = '(?:[A-Za-z][A-Za-z0-9_]+\\\\)+[A-Za-z][A-Za-z0-9_]*\b';  # fqcn must contain backslashes
-my $re_excn = '[A-Z][A-Za-z0-9_]*(?:[Ee]xception|[Ee]rror)';  # short exception class name must end in "exception" or "error"
+my $re_excn = '(?:[A-Z][A-Za-z0-9_]*(?:[Ee]xception|[Ee]rror)|ExceptionStack)';  # short exception class name must end in "exception" or "error"
 my $re_ex_code = '(?:\\/\\d+|\\(code:? \\d+\\))';
 my $re_exception = "(?:(?:$re_fqcn|$re_excn)$re_ex_code?)";
 
@@ -44,29 +57,54 @@ sub format_message ($) { $c_message . $_[0] . $c0 }
 sub format_app  ($) { $c_app  . $_[0] . $c0 }
 sub format_rpt ($) { $c_rpt . $_[0] . $c0 }
 
+my %http_success        = map{$_=>1} (200 .. 299);
+my %http_redir          = map{$_=>1} (300 .. 399, 100 .. 199);
 my %http_client_error   = map{$_=>1} (400, 404, 405, 407, 408, 410, 411, 413, 414, 415, 429, 431);
 my %http_client_failure = map{$_=>1} (401, 402, 403, 406, 409, 412, 416, 417, 420, 421, 422, 423, 424, 426, 428, 451);
 my %http_server_error   = map{$_=>1} (500 .. 599);
 
+my $c_http_success        = '[38;2;98;214;113m';
+my $c_http_redir          = '[38;2;202;214;98m';
 my $c_http_client_error   = '[38;2;155;72;72m';
 my $c_http_client_failure = '[38;2;235;41;41m';
 my $c_http_server_error   = '[38;5;199;1m';
 
+sub _format_tracefile ($$) {
+	my ($file, $lineno) = (@_);
+	my ($c_hi, $c_lo) = ($c_bold, $c_unbold);
+	my $include_lineno_in_bold = ($lineno !~ m/(?:on line|in line)/);
+
+	$c_hi . $file .
+	(($include_lineno_in_bold)
+		? $lineno . $c_lo
+		: $c_lo . $lineno)
+}
+
 sub format_exception ($) {
 	my ($in) = @_;
-	my ($prefix, $suffix);
+	my ($prefix, $suffix) = ('', '');
 	if ($in =~ s/^((?:[^\\]+\\)+)//) { $prefix = $c_exception_fqcn . $1; }
 	if ($in =~ s/(\/\d+)$//) { $suffix = $c_exception_code . $1; }
-	$prefix . $c_exception_scn . $in . $suffix . $c0
+	$prefix . $c_exception_scn . $in . $suffix . $c_exception0
 }
 
 sub format_trace ($) {
 	my ($out) = ($_[0]);
 	my ($c_hi, $c_lo) = ($c_bold, $c_unbold);
 
-	$out =~ s/\b([\w\-\.\$]+)($re_lineno)?(,|\)|\$)/ $c_hi . $1 . $2 . $c_lo . $3 /ge;
+#	$out =~ s/\b([\w\-\.\$]+)($re_lineno)?(,|\)|\s*$)/ $c_hi . $1 . $2 . $c_lo . $3 /ge;
+	$out =~ s/\b([\w\-\.\$]+)($re_lineno)?(,|\)|\s*$)/ _format_tracefile($1, $2) . $3 /ge;
 
 	$c_trace . $out . $c0
+}
+
+sub format_fncall ($) {
+	my ($out) = ($_[0]);
+	my ($c_hi, $c_lo) = ($c_bold, $c_unbold);
+
+	$out =~ s#$re_fncall# $+{'class'} . $+{'fnp'} . $c_hi . $+{'fn'}.$+{'fn2'} . $c_lo . format_info( $+{'args'} ) #gem;
+
+	$out
 }
 
 sub format_json ($) {
@@ -88,19 +126,44 @@ sub format_json ($) {
 	$c_info . $out . $c0
 }
 
-sub format_info ($) {
-	my ($in) = ($_[0]);
+sub format_http ($) {
+	my $status = $_[0];
+	my $c_http = '';
+	if    (exists($http_client_error{$status}))   { $c_http = $c_http_client_error }
+	elsif (exists($http_client_failure{$status})) { $c_http = $c_http_client_failure }
+	elsif (exists($http_server_error{$status}))   { $c_http = $c_http_server_error }
+	elsif (exists($http_success{$status}))        { $c_http = $c_http_success }
+	elsif (exists($http_redir{$status}))          { $c_http = $c_http_redir }
+	return $c_http . $status . $c0;
+}
+
+sub format_info ($;$) {
+	my ($in, $c_info) = ($_[0], $_[1] // $c_info);
 	if ($in =~ m/^( *\[)(\d\d\d)(\])$/ && ($2 >= 100 && $2 <= 599)) {
-		my $c_http;
-		if    (exists($http_client_error{$2}))   { $c_http = $c_http_client_error }
-		elsif (exists($http_client_failure{$2})) { $c_http = $c_http_client_failure }
-		elsif (exists($http_server_error{$2}))   { $c_http = $c_http_server_error }
-		return $c_info . $1 . $c_http . $2 . $c0 . $c_info . $3 . $c0;
+		return $c_info . $1 . format_http($2) . $c_info . $3 . $c0;
 	}
 	$c_info . $in . $c0
 }
 
-$|=1;
+sub format_info_prefix ($) {
+	format_info($_[0], $c_info_prefix)
+}
+
+sub format_stack ($) {
+	my ($in) = ($_[0]);
+	my $re_exc_msg = "($re_exception)(?:(: )(.*?)(?=\\)\$|; ))?";
+
+	my $stack_contains_more_than_one_exception = ($in =~ m/; $re_exception/);
+	my $fmt_stack_msg = ($stack_contains_more_than_one_exception)
+		# More than one msg in stack? format them each in the default message color for simpler reading.
+		? sub($) { format_message($_[0]) . $c_stack }
+		# Only one msg in stack? Keep it in the faint $c_stack==$c_info color, the merged message is already msg-formatted.
+		: sub($) { $_[0] };
+
+	$in =~ s/(?<=stack: )$re_exc_msg/ format_exception($1) . $2 . &$fmt_stack_msg($3) /e;
+	$in =~ s/(?<=; )$re_exc_msg/      format_exception($1) . $2 . &$fmt_stack_msg($3) /ge;
+	$c_stack . $in . $c0
+}
 
 while (<>) {
 	# every non-empty line is a full log line.
@@ -108,24 +171,27 @@ while (<>) {
 		print ; next
 	}
 
-  	my $is_continuation_line = (m/^\s*(?:#\d+\b|URI:|Referr?er:|User-?[Aa]gent:|  thrown in )/);
+	my $is_continuation_line = (m/^\s*(?:#\d+\b|URI:|Referr?er:|User-?[Aa]gent:|Stack trace:$|CLI:|  thrown in )/);
 	if ($is_continuation_line) {
 		print $contlinestart;
 	} else {
 		print $linestart;
 	}
 
-	my $suffix;
+	my $suffix = '';
 	my ($message_isolated, $exception_isolated, $text_isolated);
 
 	# The start is probably the timestamp:
-	my $re_time = '\d\d:\d\d:\d\d';
-	my $re_ddd  = '[A-Za-z]{2,3} +\d+';
-	my $re_ymd  = '\d\d\d\d-\d\d-\d\d';
-	my $re_host = '[A-Za-z][A-Za-z0-9_\-\.]+';
-	my $re_app  = '[A-Za-z][A-Za-z0-9_\-\.]+(?:\[\d+\])?';
-	my $re_word = '[A-Z][a-z]+';
-	my $re_ip   = '(?:\[(?:[0-9a-fA-F]{1,4})?(?:::?[0-9a-fA-F]{1,4}){1,7}\]|(?:[0-9a-fA-F]{1,4})?(?:::?[0-9a-fA-F]{1,4}){1,7}|\d{1,3}(?:\.\d{1,3}){3})';
+	my $re_time   = '\d\d:\d\d:\d\d';
+	my $re_ddd    = '[A-Za-z]{2,3} +\d+';
+	my $re_ymd    = '\d\d\d\d-\d\d-\d\d';
+	my $re_tz     = '[\+\-]\d\d(?::?\d\d)?';
+	my $re_host   = '[A-Za-z][A-Za-z0-9_\-\.]+';
+	my $re_app    = '[A-Za-z][A-Za-z0-9_\-\.]+(?:\[\d+\])?';
+	my $re_word   = '[A-Z][a-z]+';
+	my $re_ip     = '(?:\[(?:[0-9a-fA-F]{1,4})?(?:::?[0-9a-fA-F]{1,4}){1,7}\]|(?:[0-9a-fA-F]{1,4})?(?:::?[0-9a-fA-F]{1,4}){1,7}|\d{1,3}(?:\.\d{1,3}){3})';
+	my $re_a2date = "\\[ ?\\d{1,2}/\\w{3}/\\d{4}[ :T]$re_time(?: ?$re_tz)?\\]";
+	my $re_client = "(?:$re_ip|$re_host)";
 	if (s/^($re_ddd {1,2}$re_time) ($re_host) ($re_app)(: *)//) {
 		# syslog format
 		print format_date($1) . ' ';
@@ -147,7 +213,15 @@ while (<>) {
 		print format_date($1) . ' ';
 		print format_loglevel($2) . ' ';
 		print format_app($3) . ' ';
-		print format_info($4) . ' ';
+		print format_info_prefix($4) . ' ';
+		$message_isolated = 1;
+	} elsif (s/^($re_client(?::\d+)?) ($re_client|-) (\S+) (\S+) ($re_a2date) (?=")//) {
+		# Apache2 custom format
+		print format_host($1) . ' ';
+		print format_info_prefix($2) . ' ';  # client addr/hostname
+		print format_info_prefix($3) . ' ';  # identd logname
+		print format_info_prefix($4) . ' ';  # http basic username
+		print format_date($5) . ' ';
 		$message_isolated = 1;
 	} elsif (s/^($re_ymd $re_time)( |$)//) {
 		print format_date($1);
@@ -176,12 +250,13 @@ while (<>) {
 
 	my $re_info_brackets = '\\[[^\\]]+\\]';
 	if ($message_isolated && s/^($re_info_brackets(?: +$re_info_brackets)*)//) {
-		print format_info($1);
+		print format_info_prefix($1);
 	}
 
-	if ($message_isolated && s/^($re_exception)(: +)//) {
-		print format_exception($1);
-		print $2;
+	if ($message_isolated && s/^( *)($re_exception)(: +)//) {
+		print $1;
+		print format_exception($2);
+		print $3;
 		$exception_isolated = 1;
 	}
 
@@ -190,17 +265,19 @@ while (<>) {
 #	}
 
 #	$re_abspath = '/[a-z]+[a-z0-9]+(/[a-zA-Z0-9\\-_\\.$]+)+';
-	$re_abspath = '/[a-z]+[a-z0-9]+(?:/[a-zA-Z0-9\\-_\\.$]+)+';
-	$re_relpath = '(?:[A-Za-z0-9\\-_\\.$]+/)*[A-Za-z0-9\\-_\\.$]+';
-	$re_path    = "(?:$re_abspath|$re_relpath)";
+	my $re_abspath = '/[a-z]+[a-z0-9]+(?:/[a-zA-Z0-9\\-_\\.$]+)+';
+	my $re_relpath = '(?:[A-Za-z0-9\\-_\\.$]+/)*[A-Za-z0-9\\-_\\.$]+';
+	my $re_path    = "(?:$re_abspath|$re_relpath)";
 #	$re_lineno  = ':\\d+';
-#	if ($message_isolated && s#^(.+)( \((?:$re_fqcn|$re_excn) (?:@|at|in) $re_path(?:$re_lineno)?\))##) {
-	if ($message_isolated && s#^(.+)( \($re_exception (?:@|at|in) $re_path(?:$re_lineno)?\))##) {
+#	if ($message_isolated && s#^(.+)( \((?:$re_fqcn|$re_excn) (?:@|at|in) $re_path(?:$re_lineno)?\))##) {");
+#	if ($message_isolated && s#^(.+)( \($re_exception (?:@|at|in) $re_path(?:$re_lineno)?\))##) {
+	if ($message_isolated && s#^(.+?)(  ?\(stack: .+\))?( \($re_exception (?:@|at|in) $re_path(?:$re_lineno)?\))##) {
 		# AEH format
-		my ($message, $rest, $info) = ($1, $2, undef);
+		my ($message, $stack, $rest, $info) = ($1, $2, $3, undef);
 		if ($message =~ s/((?: $re_info_brackets)+)$//) { $info = $1; }
 		print format_message($message);
 		print format_info($info)  if $info;
+		print format_stack($stack)  if $stack;
 		print format_trace($rest);
 		$text_isolated = 1;
 #	} elsif ($message_isolated && s#^(.+?)( (?:in|at) $re_abspath(?:$re_lineno)?\b)##) {
@@ -210,15 +287,33 @@ while (<>) {
 		print format_trace($2);
 		print $3;
 		$text_isolated = 1;
+	} elsif ($message_isolated && s#^(.+?)(?:(  ?)($re_info_brackets))?(  ?(?:in|at) $re_abspath(?:$re_lineno)?\b {1,2})(?=[\(\[])##) {
+		# mini-api format
+		print format_message($1);
+		print $2 . format_info($3);
+		print format_trace($4);
+		print $5;
+		$text_isolated = 1;
+	} elsif ($message_isolated && s#("[A-Z]\w* [^"]+?") (\d+)( .*)$##) {
+		# Apache2 log
+		print format_message($1) . ' ';
+		print format_http($2);
+		print format_info($3);
+		$text_isolated = 1;
 	}
 
+
 	if ($is_continuation_line) {
-		s#($re_abspath(?:$re_lineno)?)(: $re_fncall)#format_trace($1) . $2#e or
+		s#($re_abspath(?:$re_lineno)?)(: )($re_fncall)#format_trace($1) . $2 . format_fncall($3)#e or
 		$_ = format_info($_)
 	}
 
+	if ($message_isolated && s/^($re_info_brackets(?: +$re_info_brackets)*)//) {
+		print format_info($1);
+	}
+
 	# Stack trace:
-	s/(\((?:trace|stack ?trace|call ?stack): .+?\))( |$)/format_trace($1) . $2/e;
+	s/(\((?:trace|back ?trace|stack ?trace|call ?stack): .+?\))( |$)/format_trace($1) . $2/e;
 
 	# Trailing Symfony JSON data:
 	s/ ((?=\{")$re_json) (?=\[)/' ' . format_json($1) . ' '/e;
@@ -226,6 +321,6 @@ while (<>) {
 
 	print;
 	print $suffix;
-	select()->flush();
+	flush STDOUT;
 }
 
