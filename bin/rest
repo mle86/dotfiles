@@ -80,6 +80,12 @@ output=
 info=
 errst=0
 
+if [ -n "$data" ]; then
+	add_extra_option --header 'Content-type: application/json'
+else
+	add_extra_option --header 'Content-type:'
+fi
+
 if [ -n "$MY_REST_AUTH_DATA" ]; then
 	add_extra_option --user "$MY_REST_AUTH_DATA"
 fi
@@ -90,7 +96,6 @@ for hidx in $(seq 1 $MAX_HEADERS); do
 done
 
 curlcall () { eval "curl \
-	--header 'Content-type: application/json'	\
 	--silent --show-error				\
 	--output \"\$outputfile\"			\
 	-v						\
@@ -101,7 +106,6 @@ curlcall () { eval "curl \
 }
 
 if info="$(curlcall 2>&1)"; then
-
 	code="$(printf '%s' "$info" | grep '< HTTP/' || true)"
 	headers="$(printf '%s' "$info" | grep -v '< HTTP/' | grep '^< '  || true)"
 
