@@ -289,7 +289,7 @@ while (<>) {
 		$loglevel_isolated = 1;
 	}
 
-	if ($message_isolated && s/^( *)($re_exception)(: +)//) {
+	if ($message_isolated && s/^( *(?:PHP Fatal error:  ?)?(?:Uncaught )?)($re_exception)(: +)//) {
 		print $1;
 		print format_exception($2);
 		print $3;
