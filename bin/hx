@@ -14,6 +14,8 @@ my $c_date = $c_sym;
 my $c_host = $c_sym;
 my $c_app = $c_sym;
 my $c_loglevel = $c_sym;
+my $c_loglevel_warn = '[38;5;220m';
+my $c_loglevel_err = '[38;2;255;163;0m';
 my $c_info = '[38;5;243m';
 #my $c_info_prefix = $c_info;
 my $c_info_prefix = '[38;2;125;117;83m';
@@ -35,6 +37,7 @@ my $re_json_object     = "\\s*\\{(?:$re_json_string:(?&json)(?:,$re_json_string:
 my $re_json_top_object = "\\s*\\{(?:$re_json_string:(?&json)(?:,$re_json_string:(?&json))*|\\s*)?\\}\\s*";
 my $re_json            = "(?<json>$re_json_number|$re_json_const|$re_json_string|$re_json_array|$re_json_object)";
 my $re_lineno  = '(?::\\d+|\(\d+\)| on line \d+)';
+my $re_loglevel = '(?:(?:PHP )?(?i:warn|warning|err|error|info|note|notice|crit|critical|emerg|emergency|debug|dbg|alrt|alert|parse error|fatal error))';
 
 my $re_nsname = '\\\\?(?:[A-Za-z]\w*\\\\)+';
 my $re_classname = "(?:$re_nsname)?[A-Za-z]\\w+";
@@ -52,7 +55,6 @@ my $contlinestart = "${c_contsym}●${c0} ";
 
 sub format_date ($) { $c_date . $_[0] . $c0 }
 sub format_host ($) { $c_host . $_[0] . $c0 }
-sub format_loglevel ($) { $c_loglevel . $_[0] . $c0 }
 sub format_message ($) { $c_message . $_[0] . $c0 }
 sub format_app  ($) { $c_app  . $_[0] . $c0 }
 sub format_rpt ($) { $c_rpt . $_[0] . $c0 }
@@ -149,6 +151,13 @@ sub format_info_prefix ($) {
 	format_info($_[0], $c_info_prefix)
 }
 
+sub format_loglevel ($) {
+	my ($color, $msg) = ($c_loglevel, $_[0]);
+	if    ($msg =~ m/\b(?:warn|warning)\b/i) { $color = $c_loglevel_warn }
+	elsif ($msg =~ m/\b(?:err|error|errors|crit|critical|alrt|alert|emerg|emergency)\b/i) { $color = $c_loglevel_err }
+	return $color . $msg . $c0
+}
+
 sub format_stack ($) {
 	my ($in) = ($_[0]);
 	my $re_exc_msg = "($re_exception)(?:(: )(.*?)(?=\\)\$|; ))?";
@@ -180,7 +189,7 @@ while (<>) {
 	}
 
 	my $suffix = '';
-	my ($message_isolated, $exception_isolated, $text_isolated);
+	my ($message_isolated, $loglevel_isolated, $exception_isolated, $text_isolated);
 
 	# The start is probably the timestamp:
 	my $re_time   = '\d\d:\d\d:\d\d';
@@ -188,7 +197,7 @@ while (<>) {
 	my $re_ymd    = '\d\d\d\d-\d\d-\d\d';
 	my $re_tz     = '(?:[\+\-]\d\d(?::?\d\d)?|Z)';
 	my $re_host   = '[A-Za-z][A-Za-z0-9_\-\.]+';
-	my $re_app    = '[A-Za-z][A-Za-z0-9_\-\.]+(?:\[\d+\])?';
+	my $re_app    = '[A-Za-z/][A-Za-z0-9_\-\./]+?(?:\[\d+\]|\])?';
 	my $re_word   = '[A-Z][a-z]+';
 	my $re_ip     = '(?:\[(?:[0-9a-fA-F]{1,4})?(?:::?[0-9a-fA-F]{1,4}){1,7}\]|(?:[0-9a-fA-F]{1,4})?(?:::?[0-9a-fA-F]{1,4}){1,7}|\d{1,3}(?:\.\d{1,3}){3})';
 	my $re_a2date = "\\[ ?\\d{1,2}/\\w{3}/\\d{4}[ :T]$re_time(?: ?$re_tz)?\\]";
@@ -209,6 +218,7 @@ while (<>) {
 #		print $4;
 		print format_loglevel($3 . $4);
 		$message_isolated = 1;
+		$loglevel_isolated = 1;
 	} elsif (s/^(\[$re_word $re_word \d+ $re_time(?:.\d+)? \d{4}\]) +(\[\w*:\w+\]) +(\[(?:pid )?\d+(?:[,:]tid \d+)?\]) +(\[(?:client )?$re_ip(?::\d+)?\]) //) {
 		# Apache2 error format
 		print format_date($1) . ' ';
@@ -217,6 +227,7 @@ while (<>) {
 		print format_info_prefix($4) . ' ';
 		$is_apache = 1;
 		$message_isolated = 1;
+		$loglevel_isolated = 1;
 	} elsif (s/^($re_client(?::\d+)?) ($re_client|-) (\S+) (\S+) ($re_a2date) (?=")//) {
 		# Apache2 custom format
 		print format_host($1) . ' ';
@@ -237,6 +248,7 @@ while (<>) {
 		print format_loglevel($3) . ' ';
 		print format_app($4)  if $4;
 		$message_isolated = 1;
+		$loglevel_isolated = 1;
 	} elsif (s/^(Next) ($re_exception)(: )//) {
 		# Euv continuation:
 		print format_date($1) . ' ';
@@ -258,9 +270,20 @@ while (<>) {
 		}
 	}
 
+	if ($message_isolated && !$loglevel_isolated && s/^(<$re_loglevel>  ?|$re_loglevel:  ?)//) {
+		print format_loglevel($1);
+		$loglevel_isolated = 1;
+	}
+
 	my $re_info_brackets = '\\[[^\\]]+\\]';
-	if ($message_isolated && s/^($re_info_brackets(?: +$re_info_brackets)*)//) {
+	if ($message_isolated && s/^($re_info_brackets(?: +$re_info_brackets)*)( *)//) {
 		print format_info_prefix($1);
+		print $2;
+	}
+
+	if ($message_isolated && !$loglevel_isolated && s/^(<$re_loglevel>  ?|$re_loglevel:  ?)//) {
+		print format_loglevel($1);
+		$loglevel_isolated = 1;
 	}
 
 	if ($message_isolated && s/^( *)($re_exception)(: +)//) {
