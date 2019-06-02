@@ -230,6 +230,13 @@ while (<>) {
 		print format_date($1);
 		print $2;
 		$message_isolated = 1;
+	} elsif (s/^(${re_ymd}T${re_time}(?:\.\d+)?(?:$re_tz)?) (\d) (\[\w+\]) (\/usr\/sbin\/mysqld: )?//) {
+		# mysqld error:
+		print format_date($1) . ' ';
+		print format_info_prefix($2) . ' ';
+		print format_loglevel($3) . ' ';
+		print format_app($4)  if $4;
+		$message_isolated = 1;
 	} elsif (s/^(Next) ($re_exception)(: )//) {
 		# Euv continuation:
 		print format_date($1) . ' ';
