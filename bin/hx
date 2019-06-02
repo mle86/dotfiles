@@ -171,6 +171,7 @@ while (<>) {
 		print ; next
 	}
 
+	my $is_apache;
 	my $is_continuation_line = (m/^\s*(?:#\d+\b|URI:|Referr?er:|User-?[Aa]gent:|Stack trace:$|CLI:|  thrown in )/);
 	if ($is_continuation_line) {
 		print $contlinestart;
@@ -185,7 +186,7 @@ while (<>) {
 	my $re_time   = '\d\d:\d\d:\d\d';
 	my $re_ddd    = '[A-Za-z]{2,3} +\d+';
 	my $re_ymd    = '\d\d\d\d-\d\d-\d\d';
-	my $re_tz     = '[\+\-]\d\d(?::?\d\d)?';
+	my $re_tz     = '(?:[\+\-]\d\d(?::?\d\d)?|Z)';
 	my $re_host   = '[A-Za-z][A-Za-z0-9_\-\.]+';
 	my $re_app    = '[A-Za-z][A-Za-z0-9_\-\.]+(?:\[\d+\])?';
 	my $re_word   = '[A-Z][a-z]+';
@@ -208,12 +209,13 @@ while (<>) {
 #		print $4;
 		print format_loglevel($3 . $4);
 		$message_isolated = 1;
-	} elsif (s/^(\[$re_word $re_word \d+ $re_time(?:.\d+)? \d{4}\]) +(\[\w*:\w+\]) +(\[(?:pid )?\d+\]) +(\[(?:client )?$re_ip(?::\d+)?\]) //) {
+	} elsif (s/^(\[$re_word $re_word \d+ $re_time(?:.\d+)? \d{4}\]) +(\[\w*:\w+\]) +(\[(?:pid )?\d+(?:[,:]tid \d+)?\]) +(\[(?:client )?$re_ip(?::\d+)?\]) //) {
 		# Apache2 error format
 		print format_date($1) . ' ';
 		print format_loglevel($2) . ' ';
 		print format_app($3) . ' ';
 		print format_info_prefix($4) . ' ';
+		$is_apache = 1;
 		$message_isolated = 1;
 	} elsif (s/^($re_client(?::\d+)?) ($re_client|-) (\S+) (\S+) ($re_a2date) (?=")//) {
 		# Apache2 custom format
@@ -222,6 +224,7 @@ while (<>) {
 		print format_info_prefix($3) . ' ';  # identd logname
 		print format_info_prefix($4) . ' ';  # http basic username
 		print format_date($5) . ' ';
+		$is_apache = 1;
 		$message_isolated = 1;
 	} elsif (s/^($re_ymd $re_time)( |$)//) {
 		print format_date($1);
@@ -257,6 +260,11 @@ while (<>) {
 		print $1;
 		print format_exception($2);
 		print $3;
+		$exception_isolated = 1;
+	}
+
+	if ($message_isolated && $is_apache && s/^(AH\d+:) //) {
+		print format_exception($1) . ' ';
 		$exception_isolated = 1;
 	}
 
