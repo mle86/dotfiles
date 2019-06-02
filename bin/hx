@@ -220,22 +220,23 @@ while (<>) {
 		print format_loglevel($3 . $4);
 		$message_isolated = 1;
 		$loglevel_isolated = 1;
-	} elsif (s/^(\[$re_word $re_word \d+ $re_time(?:.\d+)? \d{4}\]) +(\[\w*:\w+\]) +(\[(?:pid )?\d+(?:[,:]tid \d+)?\]) +(\[(?:client )?$re_ip(?::\d+)?\]) //) {
+	} elsif (s/^(\[$re_word $re_word \d+ $re_time(?:.\d+)? \d{4}\]) +(\[\w*:\w+\]) +(\[(?:pid )?\d+(?:[,:]tid \d+)?\]) +(\[(?:client )?$re_ip(?::\d+)?\] )?//) {
 		# Apache2 error format
 		print format_date($1) . ' ';
 		print format_loglevel($2) . ' ';
 		print format_app($3) . ' ';
-		print format_info_prefix($4) . ' ';
+		print format_info_prefix($4)  if $4;
 		$is_apache = 1;
 		$message_isolated = 1;
 		$loglevel_isolated = 1;
-	} elsif (s/^($re_client(?::\d+)?) ($re_client|-) (\S+) (\S+) ($re_a2date) (?=")//) {
+	} elsif (s/^(?<vh>$re_client(?::\d+)?) (?<cl>$re_client|-) (?<id>\S+) (?<un>\S+) (?<ts>$re_a2date) (?=")// ||
+	         s/^(?<cl>$re_client|-) (?<id>\S+) (?<un>\S+) (?<ts>$re_a2date) (?=")//) {
 		# Apache2 custom format
-		print format_host($1) . ' ';
-		print format_info_prefix($2) . ' ';  # client addr/hostname
-		print format_info_prefix($3) . ' ';  # identd logname
-		print format_info_prefix($4) . ' ';  # http basic username
-		print format_date($5) . ' ';
+		print format_host($+{'vh'}) . ' '  if $+{'vh'};
+		print format_info_prefix($+{'cl'}) . ' ';  # client addr/hostname
+		print format_info_prefix($+{'id'}) . ' ';  # identd logname
+		print format_info_prefix($+{'un'}) . ' ';  # http basic username
+		print format_date($+{'ts'}) . ' ';
 		$is_apache = 1;
 		$message_isolated = 1;
 	} elsif (s/^(${re_ymd}T${re_time}(?:\.\d+)?(?:$re_tz)?) (\d+) (\[\w+\]) ($re_mysqld)?// ||
