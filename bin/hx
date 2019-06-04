@@ -10,6 +10,7 @@ my $c0 = '[0m';
 #my $c_sym = '[38;5;210m';
 my $c_sym = '[33m';
 my $c_contsym = '[38;2;113;97;25m';
+my $c_meta = '[38;2;114;204;204m';
 my $c_date = $c_sym;
 my $c_host = $c_sym;
 my $c_app = $c_sym;
@@ -51,7 +52,12 @@ my $re_excn = '(?:[A-Z][A-Za-z0-9_]*(?:[Ee]xception|[Ee]rror)|ExceptionStack)'; 
 my $re_ex_code = '(?:\\/\\d+|\\(code:? \\d+\\))';
 my $re_exception = "(?:(?:$re_fqcn|$re_excn)$re_ex_code?)";
 
+my $re_abspath = '/[a-z]+[a-z0-9]+(?:/[a-zA-Z0-9\\-_\\.$]+)+';
+my $re_relpath = '(?:[A-Za-z0-9\\-_\\.$]+/)*[A-Za-z0-9\\-_\\.$]+';
+my $re_path    = "(?:$re_abspath|$re_relpath)";
+
 my $linestart     = "${c_sym}●${c0} ";
+my $metalinestart = "${c_meta}●${c0} ";
 my $contlinestart = "${c_contsym}●${c0} ";
 
 sub format_date ($) { $c_date . $_[0] . $c0 }
@@ -59,6 +65,7 @@ sub format_host ($) { $c_host . $_[0] . $c0 }
 sub format_message ($) { $c_message . $_[0] . $c0 }
 sub format_app  ($) { $c_app  . $_[0] . $c0 }
 sub format_rpt ($) { $c_rpt . $_[0] . $c0 }
+sub format_meta ($) { $c_meta . $_[0] . $c0 }
 
 my %http_success        = map{$_=>1} (200 .. 299);
 my %http_redir          = map{$_=>1} (300 .. 399, 100 .. 199);
@@ -91,14 +98,14 @@ sub format_exception ($) {
 	$prefix . $c_exception_scn . $in . $suffix . $c_exception0
 }
 
-sub format_trace ($) {
-	my ($out) = ($_[0]);
+sub format_trace ($;$) {
+	my ($out, $c_base) = ($_[0], ($_[1] // $c_trace));
 	my ($c_hi, $c_lo) = ($c_bold, $c_unbold);
 
 #	$out =~ s/\b([\w\-\.\$]+)($re_lineno)?(,|\)|\s*$)/ $c_hi . $1 . $2 . $c_lo . $3 /ge;
 	$out =~ s/\b([\w\-\.\$]+)($re_lineno)?(,|\)|\s*$)/ _format_tracefile($1, $2) . $3 /ge;
 
-	$c_trace . $out . $c0
+	$c_base . $out . $c0
 }
 
 sub format_fncall ($) {
@@ -179,6 +186,15 @@ while (<>) {
 	# every non-empty line is a full log line.
 	if (m/^\s*$/) {
 		print ; next
+	}
+
+	if (s/^(==+> +)($re_path)( +<==+\s*$)//) {
+		# `tail` file header
+		print $metalinestart;
+		print format_meta($1);
+		print format_trace($2, $c_meta);
+		print format_meta($3);
+		next;
 	}
 
 	my $is_apache;
@@ -321,10 +337,6 @@ while (<>) {
 #		print format_info($1);
 #	}
 
-#	$re_abspath = '/[a-z]+[a-z0-9]+(/[a-zA-Z0-9\\-_\\.$]+)+';
-	my $re_abspath = '/[a-z]+[a-z0-9]+(?:/[a-zA-Z0-9\\-_\\.$]+)+';
-	my $re_relpath = '(?:[A-Za-z0-9\\-_\\.$]+/)*[A-Za-z0-9\\-_\\.$]+';
-	my $re_path    = "(?:$re_abspath|$re_relpath)";
 #	$re_lineno  = ':\\d+';
 #	if ($message_isolated && s#^(.+)( \((?:$re_fqcn|$re_excn) (?:@|at|in) $re_path(?:$re_lineno)?\))##) {");
 #	if ($message_isolated && s#^(.+)( \($re_exception (?:@|at|in) $re_path(?:$re_lineno)?\))##) {
