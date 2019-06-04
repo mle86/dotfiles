@@ -110,8 +110,8 @@ sub format_fncall ($) {
 	$out
 }
 
-sub format_json ($) {
-	my ($out, $in) = ('', $_[0]);
+sub format_json ($;$) {
+	my ($out, $in, $c_json) = ('', $_[0], ($_[1] // $c_info));
 	my ($c_hi, $c_lo) = ($c_bold, $c_unbold);
 
 	while ($in ne '') {
@@ -126,7 +126,7 @@ sub format_json ($) {
 		$out = $c_hi . $1 . $c_lo . $2 . $c_hi . $3 . $c_lo;
 	}
 
-	$c_info . $out . $c0
+	$c_json . $out . $c0
 }
 
 sub format_http ($) {
@@ -358,8 +358,15 @@ while (<>) {
 	s/(\((?:trace|back ?trace|stack ?trace|call ?stack): .+?\))( |$)/format_trace($1) . $2/e;
 
 	# Trailing Symfony JSON data:
-	s/ ((?=\{")$re_json) (?=\[)/' ' . format_json($1) . ' '/e;
-	s/( \[\])$/format_info($1)/e;
+	if ($message_isolated) {
+		s/ ((?=\{")$re_json) (?=\[)/' ' . format_json($1) . ' '/e;
+		s/( \[\])$/format_info($1)/e;
+	}
+
+	# JSON-only line:
+	if (!$message_isolated) {
+		s/^((?=\{")$re_json)$/ format_json($1, '') /e;
+	}
 
 	print;
 	print $suffix;
