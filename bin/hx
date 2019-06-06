@@ -293,6 +293,19 @@ while (<>) {
 		print $2;
 		print format_exception($3);
 		$message_isolated = 1;
+	} elsif (s/^($re_ymd $re_time(?:,\d+)?:)($re_loglevel:)([^:]+:)//) {
+		# LetsEncrypt/certbot
+		print format_date($1);
+		print format_loglevel($2);
+		print format_app($3);
+		$message_isolated = 1;
+		$loglevel_isolated = 1;
+	} elsif (s/^($re_ymd $re_time(?:,\d+)?)( - )(\w[^\[]*)(\[$re_loglevel\]: )//) {
+		# cloud-init
+		print format_date($1 . $2);
+		print format_app($3);
+		print format_loglevel($4);
+		$message_isolated = 1;
 	}
 
 	if ($is_dmesg && s/^((-{3,}) ?[\[\(].+[\]\)] ?-{3,}\s*)//) {
