@@ -7,7 +7,6 @@ my $c_faint = '[2m';
 my $c_unfaint = '[22m';
 my $c0 = '[0m';
 
-#my $c_sym = '[38;5;210m';
 my $c_sym = '[33m';
 my $c_contsym = '[38;2;113;97;25m';
 my $c_meta = '[38;2;114;204;204m';
@@ -16,10 +15,8 @@ my $c_host = $c_sym;
 my $c_app = $c_sym;
 my $c_loglevel = $c_sym;
 my $c_loglevel_warn = '[38;5;220m';
-#my $c_loglevel_err = '[38;2;255;163;0m';
 my $c_loglevel_err = '[38;2;255;145;36m';
 my $c_info = '[38;5;243m';
-#my $c_info_prefix = $c_info;
 my $c_info_prefix = '[38;2;125;117;83m';
 my $c_trace = $c_info;
 my $c_stack = $c_info;
@@ -36,24 +33,23 @@ my $re_json_const      = '\\s*(?:null|true|false)\\s*';
 my $re_json_string     = '(?<jstr0>\\s*")(?<jstr>(?:\\\\.|[^"\\\\]+)*+)(?<jstr1>"\\s*)';
 my $re_json_array      = "\\s*\\[(?:(?&json)(?:,(?&json))*|\\s*)\\]\\s*";
 my $re_json_object     = "\\s*\\{(?:$re_json_string:(?&json)(?:,$re_json_string:(?&json))*|\\s*)?\\}\\s*";
-my $re_json_top_object = "\\s*\\{(?:$re_json_string:(?&json)(?:,$re_json_string:(?&json))*|\\s*)?\\}\\s*";
 my $re_json            = "(?<json>$re_json_number|$re_json_const|$re_json_string|$re_json_array|$re_json_object)";
 my $re_lineno  = '(?::\\d+|\(\d+\)| on line \d+)';
-my $re_loglevel = '(?:(?:PHP )?(?i:warn|warning|err|error|info|note|notice|crit|critical|emerg|emergency|debug|dbg|alrt|alert|parse error|fatal error))';
+my $re_loglevel = '(?:(?:PHP )?(?i:warn|warning|warnung|err|error|fehler|info|information|note|notice|hinweis|crit|critical|schwerwiegend|emerg|emergency|debug|dbg|alrt|alert|parse error|fatal error))';
 
-my $re_nsname = '\\\\?(?:[A-Za-z]\w*\\\\)+';
-my $re_classname = "(?:$re_nsname)?[A-Za-z]\\w+";
+my $re_nsname = '(?:\\\\?(?:[A-Za-z]\w*\\\\)+)';
+my $re_classname = "(?:$re_nsname?[A-Za-z]\\w+)";
 my $re_fnname = '(?:[A-Za-z_]\\w*|\\{closure\\})';
 my $re_fnprefix = '(?:->|::)';
-my $re_fncall = "(?<class>${re_nsname}(?=\{)|${re_classname}(?=${re_fnprefix})|${re_classname}::${re_nsname})?(?<fnp>${re_fnprefix})?(?<fn>${re_fnname})(?<args> ?\\(.*\\))";
+my $re_fncall = "(?:(?<class>${re_nsname}(?=\{)|${re_classname}(?=${re_fnprefix})|${re_classname}::${re_nsname})?(?<fnp>${re_fnprefix})?(?<fn>${re_fnname})(?<args> ?\\(.*\\)))";
 
-my $re_fqcn = '(?:[A-Za-z][A-Za-z0-9_]+\\\\)+[A-Za-z][A-Za-z0-9_]*\b';  # fqcn must contain backslashes
+my $re_fqcn = '(?:(?:[A-Za-z][A-Za-z0-9_]+\\\\)+[A-Za-z][A-Za-z0-9_]*\b)';  # fqcn must contain backslashes
 my $re_excn = '(?:[A-Z][A-Za-z0-9_]*(?:[Ee]xception|[Ee]rror)|ExceptionStack)';  # short exception class name must end in "exception" or "error"
 my $re_ex_code = '(?:\\/\\d+|\\(code:? \\d+\\))';
 my $re_exception = "(?:(?:$re_fqcn|$re_excn)$re_ex_code?)";
 
-my $re_abspath = '/[a-z]+[a-z0-9]+(?:/[a-zA-Z0-9\\-_\\.$]+)+';
-my $re_relpath = '(?:[A-Za-z0-9\\-_\\.$]+/)*[A-Za-z0-9\\-_\\.$]+';
+my $re_abspath = '(?:/[a-z]+[a-z0-9]+(?:/[a-zA-Z0-9\\-_\\.$]+)+)';
+my $re_relpath = '(?:(?:[A-Za-z0-9\\-_\\.$]+/)*[A-Za-z0-9\\-_\\.$]+)';
 my $re_path    = "(?:$re_abspath|$re_relpath)";
 
 my $linestart     = "${c_sym}●${c0} ";
@@ -102,7 +98,6 @@ sub format_trace ($;$) {
 	my ($out, $c_base) = ($_[0], ($_[1] // $c_trace));
 	my ($c_hi, $c_lo) = ($c_bold, $c_unbold);
 
-#	$out =~ s/\b([\w\-\.\$]+)($re_lineno)?(,|\)|\s*$)/ $c_hi . $1 . $2 . $c_lo . $3 /ge;
 	$out =~ s/\b([\w\-\.\$]+)($re_lineno)?(,|\)|\s*$)/ _format_tracefile($1, $2) . $3 /ge;
 
 	$c_base . $out . $c0
@@ -161,8 +156,8 @@ sub format_info_prefix ($) {
 
 sub format_loglevel ($) {
 	my ($color, $msg) = ($c_loglevel, $_[0]);
-	if    ($msg =~ m/\b(?:warn|warning)\b/i) { $color = $c_loglevel_warn }
-	elsif ($msg =~ m/\b(?:err|error|errors|crit|critical|alrt|alert|emerg|emergency)\b/i) { $color = $c_loglevel_err }
+	if    ($msg =~ m/\b(?:warn|warning|warnung)\b/i) { $color = $c_loglevel_warn }
+	elsif ($msg =~ m/\b(?:err|error|errors|fehler|crit|critical|schwerwiegend|alrt|alert|emerg|emergency)\b/i) { $color = $c_loglevel_err }
 	return $color . $msg . $c0
 }
 
@@ -210,38 +205,35 @@ while (<>) {
 	my ($message_isolated, $loglevel_isolated, $exception_isolated, $text_isolated);
 
 	# The start is probably the timestamp:
-	my $re_time   = '\d\d:\d\d:\d\d';
-	my $re_ms     = '(?:\.\d{1,6})';
-	my $re_ddd    = '[A-Za-z]{2,3} +\d+';
-	my $re_ymd    = '\d\d\d\d-\d\d-\d\d';
+	my $re_time   = '(?:\d\d:\d\d:\d\d)';
+	my $re_ms     = '(?:[\.,]\d{1,6})';
+	my $re_ddd    = '(?:[A-Za-z]{2,3} +\d+)';
+	my $re_ymd    = '(?:\d\d\d\d-\d\d-\d\d|\d\d\d\d\.\d\d\.\d\d)';
 	my $re_tz     = '(?:[\+\-]\d\d(?::?\d\d)?|Z)';
 	my $re_ts8601 = "(?:${re_ymd}T${re_time}${re_ms}?(?:$re_tz)?)";  # 2019-07-07T18:22:34.001Z
 	my $re_tsw    = "(?:\\d{1,2}-\\w{2,4}-\\d{4} ${re_time}${re_ms}?)";  # 07-Jun-2019 11:36:20.106
 	my $re_host   = '[A-Za-z][A-Za-z0-9_\-\.]+';
-	my $re_app    = '[A-Za-z/][A-Za-z0-9_\-\./]+?(?:\[\d+\]|\])?';
-	my $re_word   = '[A-Z][a-z]+';
+	my $re_host   = '(?:[A-Za-z][A-Za-z0-9_\-\.]+)';
+	my $re_app    = '(?:[A-Za-z/][A-Za-z0-9_\-\./]+?(?:\[\d+\]|\])?)';
+	my $re_word   = '(?:[A-Z][a-z]+)';
 	my $re_ip     = '(?:\[(?:[0-9a-fA-F]{1,4})?(?:::?[0-9a-fA-F]{1,4}){1,7}\]|(?:[0-9a-fA-F]{1,4})?(?:::?[0-9a-fA-F]{1,4}){1,7}|\d{1,3}(?:\.\d{1,3}){3})';
 	my $re_client = "(?:$re_ip|$re_host)";
-	my $re_mysqld = '(?:\\/usr\\/sbin\\/)?mysqld: ';
-	my $re_a2date = "\\[ ?\\d{1,2}/\\w{3}/\\d{4}[ :T]$re_time(?: ?$re_tz)?\\]";
-	my $re_a2clnt = "(?:\\[(?:client )?$re_client(?::\\d+)?\\])";
+	my $re_mysqld = '(?:(?:\\/usr\\/sbin\\/)?mysqld: )';
+	my $re_a2date = "(?:\\[ ?\\d{1,2}/\\w{3}/\\d{4}[ :T]$re_time(?: ?$re_tz)?\\])";
+	my $re_a2clnt = "(?:(?:\\[(?:client )?$re_client(?::\\d+)?\\]))";
 	my $re_a2err  = '(?:AH\d+)';
-	my $re_dmesg_ts  = "\\[\\d+${re_ms}?\\]";
-	my $re_dmesg_app = '[A-Za-z0-9][\\w\\-\\.]*(?: [\\w\\-\\.:]+)?';
+	my $re_dmesg_ts  = "(?:\\[\\d+${re_ms}?\\])";
+	my $re_dmesg_app = '(?:[A-Za-z0-9][\\w\\-\\.]*(?: [\\w\\-\\.:]+)?)';
 	if (s/^($re_ddd {1,2}$re_time) ($re_host) ($re_app)(: *)//) {
 		# syslog format
 		print format_date($1) . ' ';
 		print format_host($2) . ' ';
-#		print format_app($3) . '';
-#		print $4;
 		print format_app($3 . $4) . '';
 		$message_isolated = 1;
 	} elsif (s/^(\[$re_ymd $re_time\]) ($re_app)(\.[A-Z]+)?(: *)//) {
 		# symfony format
 		print format_date($1) . ' ';
 		print format_app($2);
-#		print format_loglevel($3)  if $3;
-#		print $4;
 		print format_loglevel($3 . $4);
 		$message_isolated = 1;
 		$loglevel_isolated = 1;
@@ -307,6 +299,7 @@ while (<>) {
 		print format_app($3);
 		print format_loglevel($4);
 		$message_isolated = 1;
+		$loglevel_isolated = 1;
 	} elsif (s/^($re_ymd $re_time$re_ms?|$re_ts8601|$re_tsw|\[$re_ymd $re_time$re_ms?\])( |:|$)//) {
 		print format_date($1 . $2);
 		$message_isolated = 1;
@@ -331,7 +324,7 @@ while (<>) {
 		$loglevel_isolated = 1;
 	}
 
-	my $re_info_brackets = '\\[[^\\]]+\\]';
+	my $re_info_brackets = '(?:\\[[^\\]]+\\])';
 	if ($message_isolated && s/^($re_info_brackets(?: +$re_info_brackets)*)( *)//) {
 		print format_info_prefix($1);
 		print $2;
@@ -356,7 +349,6 @@ while (<>) {
 	} elsif ($message_isolated && $is_apache && s/^((?:\(\d+\))?\w+(?: \w+)*: )($re_a2clnt )?($re_a2err:) //) {
 		# apache2: "(13)Permission denied: [client 00.000.000.00:0000] AH01620: Could not open..."
 		print $1;
-#		print format_info_prefix($2)  if $2;
 		print $2  if $2;
 		print format_exception($3) . ' ';
 		$exception_isolated = 1;
@@ -366,10 +358,7 @@ while (<>) {
 #		print format_info($1);
 #	}
 
-#	$re_lineno  = ':\\d+';
-#	if ($message_isolated && s#^(.+)( \((?:$re_fqcn|$re_excn) (?:@|at|in) $re_path(?:$re_lineno)?\))##) {");
-#	if ($message_isolated && s#^(.+)( \($re_exception (?:@|at|in) $re_path(?:$re_lineno)?\))##) {
-	if ($message_isolated && s#^(.+?)(  ?\(stack: .+\))?( \($re_exception (?:@|at|in) $re_path(?:$re_lineno)?\))##) {
+	if ($message_isolated && s#^(.+?)(  ?\(stack: .+\))?( \($re_exception (?:@|at|in) $re_path$re_lineno?\))##) {
 		# AEH format
 		my ($message, $stack, $rest, $info) = ($1, $2, $3, undef);
 		if ($message =~ s/((?: $re_info_brackets)+)$//) { $info = $1; }
@@ -378,7 +367,6 @@ while (<>) {
 		print format_stack($stack)  if $stack;
 		print format_trace($rest);
 		$text_isolated = 1;
-#	} elsif ($message_isolated && s#^(.+?)( (?:in|at) $re_abspath(?:$re_lineno)?\b)##) {
 	} elsif ($message_isolated && s#^(.+?)( (?:in|at) $re_abspath(?:$re_lineno)?\b)(\s*$)##) {
 		# "MESSAGE in FILE:LINE" format
 		print format_message($1);
@@ -401,9 +389,12 @@ while (<>) {
 	}
 
 
-	if ($is_continuation_line) {
-		s#($re_abspath(?:$re_lineno)?)(: )($re_fncall)#format_trace($1) . $2 . format_fncall($3)#e or
-		$_ = format_info($_)
+	if ($is_continuation_line && s/^(#\d+ )?($re_abspath(?:$re_lineno)?)(: )($re_fncall)//) {
+		print format_info($1)  if $1;
+		print format_trace($2) . $3 . format_fncall($4);
+	} elsif ($is_continuation_line) {
+		# all continuation lines get info-colored:
+		print $c_info;
 	}
 
 	if ($message_isolated && s/^($re_info_brackets(?: +$re_info_brackets)*)//) {
