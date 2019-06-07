@@ -211,9 +211,12 @@ while (<>) {
 
 	# The start is probably the timestamp:
 	my $re_time   = '\d\d:\d\d:\d\d';
+	my $re_ms     = '(?:\.\d{1,6})';
 	my $re_ddd    = '[A-Za-z]{2,3} +\d+';
 	my $re_ymd    = '\d\d\d\d-\d\d-\d\d';
 	my $re_tz     = '(?:[\+\-]\d\d(?::?\d\d)?|Z)';
+	my $re_ts8601 = "(?:${re_ymd}T${re_time}${re_ms}?(?:$re_tz)?)";  # 2019-07-07T18:22:34.001Z
+	my $re_tsw    = "(?:\\d{1,2}-\\w{2,4}-\\d{4} ${re_time}${re_ms}?)";  # 07-Jun-2019 11:36:20.106
 	my $re_host   = '[A-Za-z][A-Za-z0-9_\-\.]+';
 	my $re_app    = '[A-Za-z/][A-Za-z0-9_\-\./]+?(?:\[\d+\]|\])?';
 	my $re_word   = '[A-Z][a-z]+';
@@ -223,7 +226,7 @@ while (<>) {
 	my $re_a2date = "\\[ ?\\d{1,2}/\\w{3}/\\d{4}[ :T]$re_time(?: ?$re_tz)?\\]";
 	my $re_a2clnt = "(?:\\[(?:client )?$re_client(?::\\d+)?\\])";
 	my $re_a2err  = '(?:AH\d+)';
-	my $re_dmesg_ts  = '\[\d+(?:\.\d+)?\]';
+	my $re_dmesg_ts  = "\\[\\d+${re_ms}?\\]";
 	my $re_dmesg_app = '[A-Za-z0-9][\\w\\-\\.]*(?: [\\w\\-\\.:]+)?';
 	if (s/^($re_ddd {1,2}$re_time) ($re_host) ($re_app)(: *)//) {
 		# syslog format
@@ -242,7 +245,7 @@ while (<>) {
 		print format_loglevel($3 . $4);
 		$message_isolated = 1;
 		$loglevel_isolated = 1;
-	} elsif (s/^(\[$re_word $re_word \d+ $re_time(?:.\d+)? \d{4}\]) +(\[\w*:\w+\]) +(\[(?:pid )?\d+(?:[,:]tid \d+)?\]) +($re_a2clnt )?//) {
+	} elsif (s/^(\[$re_word $re_word \d+ $re_time$re_ms? \d{4}\]) +(\[\w*:\w+\]) +(\[(?:pid )?\d+(?:[,:]tid \d+)?\]) +($re_a2clnt )?//) {
 		# Apache2 error format
 		print format_date($1) . ' ';
 		print format_loglevel($2) . ' ';
@@ -261,7 +264,7 @@ while (<>) {
 		print format_date($+{'ts'}) . ' ';
 		$is_apache = 1;
 		$message_isolated = 1;
-	} elsif (s/^(${re_ymd}T${re_time}(?:\.\d+)?(?:$re_tz)?) (\d+) (\[\w+\]) ($re_mysqld)?// ||
+	} elsif (s/^($re_ts8601) (\d+) (\[\w+\]) ($re_mysqld)?// ||
 		 s/^(${re_ymd} ${re_time}) (\d+) (\[\w+\]) ($re_mysqld)?//) {
 		# mysqld error:
 		print format_date($1) . ' ';
@@ -280,10 +283,6 @@ while (<>) {
 		# dmesg (other)
 		print format_date($1) . ' ';
 		$is_dmesg = 1;
-	} elsif (s/^($re_ymd $re_time)( |$)//) {
-		print format_date($1);
-		print $2;
-		$message_isolated = 1;
 	} elsif (s/^(Next) ($re_exception)(: )//) {
 		# Euv continuation:
 		print format_date($1) . ' ';
@@ -308,6 +307,9 @@ while (<>) {
 		print format_app($3);
 		print format_loglevel($4);
 		$message_isolated = 1;
+	} elsif (s/^($re_ymd $re_time$re_ms?|$re_ts8601|$re_tsw|\[$re_ymd $re_time$re_ms?\])( |:|$)//) {
+		print format_date($1 . $2);
+		$message_isolated = 1;
 	}
 
 	if ($is_dmesg && s/^((-{3,}) ?[\[\(].+[\]\)] ?-{3,}\s*)//) {
@@ -322,6 +324,10 @@ while (<>) {
 
 	if ($message_isolated && !$loglevel_isolated && s/^(<$re_loglevel>  ?|$re_loglevel:  ?)//) {
 		print format_loglevel($1);
+		$loglevel_isolated = 1;
+	} elsif ($message_isolated && !$loglevel_isolated && s/^($re_loglevel) (\[\S+\]) //) {
+		print format_loglevel($1) . ' ';
+		print format_app($2) . ' ';
 		$loglevel_isolated = 1;
 	}
 
