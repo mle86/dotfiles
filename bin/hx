@@ -318,9 +318,11 @@ while (<>) {
 	if ($message_isolated && !$loglevel_isolated && s/^(<$re_loglevel>  ?|$re_loglevel:  ?)//) {
 		print format_loglevel($1);
 		$loglevel_isolated = 1;
-	} elsif ($message_isolated && !$loglevel_isolated && s/^($re_loglevel) (\[\S+\]) //) {
+	} elsif ($message_isolated && !$loglevel_isolated && s/^($re_loglevel) (\[\S+\]) ([a-z]+(?:\.\w+)+ )?//) {
+		# LOGLEVEL [component] org.java.classname
 		print format_loglevel($1) . ' ';
 		print format_app($2) . ' ';
+		print format_info_prefix($3)  if $3;
 		$loglevel_isolated = 1;
 	}
 
