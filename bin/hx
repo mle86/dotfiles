@@ -324,6 +324,11 @@ while (<>) {
 		print format_app($2) . ' ';
 		print format_info_prefix($3)  if $3;
 		$loglevel_isolated = 1;
+	} elsif ($message_isolated && !$loglevel_isolated && s/^($re_loglevel) (\($re_path$re_lineno?\): )//) {
+		# LOGLEVEL (FILENAME.PY:LINENO):
+		print format_loglevel($1) . ' ';
+		print format_info_prefix($2);
+		$loglevel_isolated = 1;
 	}
 
 	my $re_info_brackets = '(?:\\[[^\\]]+\\])';
