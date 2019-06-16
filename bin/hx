@@ -150,8 +150,34 @@ sub format_info ($;$) {
 	$c_info . $in . $c0
 }
 
-sub format_info_prefix ($) {
-	format_info($_[0], $c_info_prefix)
+sub format_info_prefix ($;$) {
+	my ($in, $mode) = @_;
+
+	if ($mode eq 'RFC5424') {
+		# reformat RFC-5424-style Structured Data elements
+		$in = format_rfc5424_sd($in);
+	}
+
+	format_info($in, $c_info_prefix)
+}
+
+sub format_rfc5424_sd ($) {
+	my ($in, $out) = ($_[0], '');
+	my ($c_id_hi, $c_id_lo) = ($c_bold, $c_unbold);
+	my ($c_pn_hi, $c_pn_lo) = ($c_bold, $c_unbold);
+
+	while ($in =~ s/^(\[)([^\s\]]+)( [^=]+=\"[^"]*\")*(\] ?)//) {
+		my ($prefix, $id, $params, $suffix) = ($1, $2, $3, $4);
+
+		my $params_out = '';
+		while ($params =~ m/( +)([^=]+)(=)(\"[^"]*\")/g) {
+			$params_out .= $1 . $c_pn_hi . $2 . $c_pn_lo . $3 . $4;
+		}
+
+		$out .= $prefix . $c_id_hi . $id . $c_id_lo . $params_out . $suffix;
+	}
+
+	$out . $in
 }
 
 sub format_loglevel ($) {
@@ -193,6 +219,7 @@ while (<>) {
 	}
 
 	my $is_apache;
+	my $is_rfc5424;
 	my $is_dmesg;
 	my $is_continuation_line = (m/^\s*(?:#\d+\b|URI:|Referr?er:|User-?[Aa]gent:|Stack trace:$|CLI:|  thrown in | {16,})/);
 	if ($is_continuation_line) {
@@ -230,6 +257,18 @@ while (<>) {
 		print format_host($2) . ' ';
 		print format_app($3 . $4) . '';
 		$message_isolated = 1;
+	} elsif (s/^($re_ddd {1,2}$re_time) ($re_host) (\d+) ($re_ts8601) ($re_host) ($re_app|-) (\d+|-) (\S+) //) {
+		# syslog RFC-5424 format
+		print format_date($1) . ' ';
+		print format_host($2) . ' ';
+		print format_info_prefix($3) . ' ';
+		print format_date($4) . ' ';
+		print format_host($5) . ' ';
+		print format_app($6) . ' ';
+		print format_app($7) . ' ';  # PID
+		print format_info_prefix($8) . ' ';  # msgid
+		$message_isolated = 1;
+		$is_rfc5424 = 1;
 	} elsif (s/^(\[$re_ymd $re_time\]) ($re_app)(\.[A-Z]+)?(: *)//) {
 		# symfony format
 		print format_date($1) . ' ';
@@ -332,9 +371,12 @@ while (<>) {
 	}
 
 	my $re_info_brackets = '(?:\\[[^\\]]+\\])';
-	if ($message_isolated && s/^($re_info_brackets(?: +$re_info_brackets)*)( *)//) {
-		print format_info_prefix($1);
+	if ($message_isolated && s/^($re_info_brackets(?: *$re_info_brackets)*)( *)//) {
+		print format_info_prefix($1, ($is_rfc5424 ? 'RFC5424' : undef));
 		print $2;
+	} elsif ($message_isolated && $is_rfc5424 && s/^(-) //) {
+		# RFC5424 with empty Structured Data field
+		print format_info_prefix($1) . ' ';
 	}
 
 	if ($message_isolated && !$loglevel_isolated && s/^(<$re_loglevel>  ?|$re_loglevel:  ?)//) {
