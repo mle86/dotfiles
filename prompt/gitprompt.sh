@@ -7,12 +7,7 @@ if [ "$USER" != "root" ]; then
 fi
 
 _gitinfo () {
-	local local_commits=
-	local remote_commits=
-	local changes=
-	local rebase_commit=
-	local stashes=
-	local gitdir=
+	local local_commits= remote_commits= changes= rebase_commit= stashes= gitdir=
 	local branch=$(git rev-parse  --abbrev-ref HEAD  2>/dev/null)
 
 	if [ "$branch" = "HEAD" ]; then
@@ -43,8 +38,7 @@ _gitinfo () {
 		[ -n "$gitdir" ] || gitdir=$(git rev-parse  --git-dir)
 		[ -n "$(GIT_DIR="$gitdir" git stash list --no-decorate -n 1)" ] && stashes=yes
 
-		local _remote_ahead=
-		local _local_ahead=
+		local _remote_ahead= _local_ahead=
 		local IFS=$'\t '
 		read -r _remote_ahead _local_ahead < <(git rev-list  --count  --left-right @{u}...  2>/dev/null)
 		[ -n "$_local_ahead"  ] && [ "$_local_ahead"  -gt 0 ] && local_commits="$_local_ahead"
@@ -56,23 +50,19 @@ _gitinfo () {
 
 _setgitprompt () {
 	local errstate="$?"
-
-	local symbol_color='\[[1;38;5;190m\]'  # 226
-	local symbol_err_color='\[[1;38;5;208m\]'
-	local symbol_rest_color='\[[1;38;5;49m\]'
-	local stash_symbol_color='\[[0;38;5;239m\]'
-	local info_color='\[[0;38;5;190m\]'
-#	local user_color='\[[0;38;5;256m\]'
-#	local host_color='\[[0;37m\]'
-	local cwd_color='\[[1;37m\]'
-	local sgr0='\[[0m\]'
-
-	local local_commits_color=$info_color
-	local branch_color=$info_color
-	local remote_commits_color='\[[0;38;5;160m\]'
-	local changes_color='\[[0;38;5;121m\]'
-	local untracked_color='\[[1;38;5;88m\]'
-	local rebase_color='\[[0;38;5;141m\]'
+	local symbol_color='\[[1;38;5;190m\]' \
+	      symbol_err_color='\[[1;38;5;208m\]' \
+	      symbol_rest_color='\[[1;38;5;49m\]' \
+	      stash_symbol_color='\[[0;38;5;239m\]' \
+	      info_color='\[[0;38;5;190m\]' \
+	      cwd_color='\[[1;37m\]' \
+	      sgr0='\[[0m\]'
+	local local_commits_color="$info_color" \
+	      branch_color="$info_color" \
+	      remote_commits_color='\[[0;38;5;160m\]' \
+	      changes_color='\[[0;38;5;121m\]' \
+	      untracked_color='\[[1;38;5;88m\]' \
+	      rebase_color='\[[0;38;5;141m\]'
 
 	local changes= local_commits= remote_commits= rebase= stashes= branch=
 	IFS=':' read changes local_commits remote_commits rebase stashes branch < <(_gitinfo)
@@ -87,8 +77,8 @@ _setgitprompt () {
 	[ -n "$remote_commits" ] && remote_commits="$remote_commits_color$remote_commits "
 	[ -n "$local_commits" ] && local_commits="$local_commits_color$local_commits "
 
-	local prefix_color="$symbol_color"
-	local suffix_color="$symbol_color"
+	local prefix_color="$symbol_color" \
+	      suffix_color="$symbol_color"
 
 	[ "$errstate" -ne 0 -a "$errstate" -ne 130 ] && \
 		suffix_color=$symbol_err_color

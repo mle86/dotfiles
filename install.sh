@@ -11,9 +11,9 @@ ask_symlink ".rest_fn.sh" "rest_fn.sh"
 ask_symlink ".templates" "templates/"
 
 while true; do
-	ask "Welcher Prompt soll als $(hi ~/.prompt) installiert werden? $(pc g)itprompt.sh / $(pc b)lueprompt.sh / kei$(pc n)er [g/b/N]"  'n'
+	ask "Welcher Prompt soll als $(hi ~/.prompt) installiert werden? $(pc g)itprompt.sh / $(pc s)impleprompt.sh / kei$(pc n)er [g/b/N]"  'n'
 	if   is G;  then install_symlink ".prompt" "prompt/gitprompt.sh"  ; break
-	elif is B;  then install_symlink ".prompt" "prompt/blueprompt.sh" ; break
+	elif is S;  then install_symlink ".prompt" "prompt/simpleprompt.sh" ; break
 	elif is_no; then break ; fi
 done
 
