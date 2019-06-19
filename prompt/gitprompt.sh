@@ -50,11 +50,11 @@ _gitinfo () {
 
 _setgitprompt () {
 	local errstate="$?"
-	local symbol_color='\[[1;38;5;190m\]' \
+	local symbol_color="\\[[1m${PROMPTCOLOR:-"[38;5;190m"}\\]" \
 	      symbol_err_color='\[[1;38;5;208m\]' \
 	      symbol_rest_color='\[[1;38;5;49m\]' \
 	      stash_symbol_color='\[[0;38;5;239m\]' \
-	      info_color='\[[0;38;5;190m\]' \
+	      info_color="\\[[0m[0m${PROMPTCOLOR:-"[38;5;190m"}\\]" \
 	      cwd_color='\[[1;37m\]' \
 	      sgr0='\[[0m\]'
 	local local_commits_color="$info_color" \

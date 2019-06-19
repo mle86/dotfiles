@@ -376,6 +376,7 @@ set_ls_colors ; unset -f set_ls_colors
 
 ###  Includes:  ##################################################
 
+[ -r ~/.promptcolor ] && . ~/.promptcolor
 [ -r ~/.prompt ] && . ~/.prompt
 [ -r ~/.extra ] && . ~/.extra
 [ -r ~/.rest_fn.sh ] && . ~/.rest_fn.sh
