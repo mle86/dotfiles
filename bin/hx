@@ -44,7 +44,7 @@ my $re_fnprefix = '(?:->|::)';
 my $re_fncall = "(?:(?<class>${re_nsname}(?=\{)|${re_classname}(?=${re_fnprefix})|${re_classname}::${re_nsname})?(?<fnp>${re_fnprefix})?(?<fn>${re_fnname})(?<args> ?\\(.*\\)))";
 
 my $re_fqcn = '(?:(?:[A-Za-z][A-Za-z0-9_]+\\\\)+[A-Za-z][A-Za-z0-9_]*\b)';  # fqcn must contain backslashes
-my $re_excn = '(?:[A-Z][A-Za-z0-9_]*(?:[Ee]xception|[Ee]rror)|ExceptionStack)';  # short exception class name must end in "exception" or "error"
+my $re_excn = '(?:[A-Z][A-Za-z0-9_]*(?:[Ee]xception|[Ee]rror)|ExceptionStack|Error)';  # short exception class name must end in "exception" or "error"
 my $re_ex_code = '(?:\\/\\d+|\\(code:? \\d+\\))';
 my $re_exception = "(?:(?:$re_fqcn|$re_excn)$re_ex_code?)";
 
