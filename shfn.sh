@@ -253,3 +253,32 @@ showdiff () {
 	fi
 }
 
+# showcolordemo maxColumns colno color text
+#  Prints the $text input, replacing any literal "$colno" with the $colno value
+#  and any literal "$color" with the $color value.
+#  After $maxColumns calls, a newline is printed afterwards.
+#  (Be careful: the $text value will be part of an eval command.)
+showcolordemo () {
+	local maxColumns="$1"
+	local colno="$2"
+	local color="$3"
+	local demo="$4"
+
+	eval "printf '%s' \"$demo\""
+
+	_col=$((_col + 1))
+	if [ "$_col" -ge "$maxColumns" ]; then
+		_col=0
+		echo ""
+	fi
+}
+_col=0
+
+# store_prompt_color ansiColorSequence
+store_prompt_color () {
+	local seq="$1"
+	local output="$HOME/.promptcolor"
+
+	printf "#!/bin/sh\n\nPROMPTCOLOR='%s'\n\n" "$seq" > "$output"
+}
+

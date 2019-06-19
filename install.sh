@@ -10,12 +10,45 @@ ask_symlink ".bash_aliases" "bash_aliases.sh"
 ask_symlink ".rest_fn.sh" "rest_fn.sh"
 ask_symlink ".templates" "templates/"
 
+dfl_promptcolor=
+ask_promptcolor=
+
 while true; do
-	ask "Welcher Prompt soll als $(hi ~/.prompt) installiert werden? $(pc g)itprompt.sh / $(pc s)impleprompt.sh / kei$(pc n)er [g/b/N]"  'n'
-	if   is G;  then install_symlink ".prompt" "prompt/gitprompt.sh"  ; break
-	elif is S;  then install_symlink ".prompt" "prompt/simpleprompt.sh" ; break
-	elif is_no; then break ; fi
+	ask "Welcher Prompt soll als $(hi ~/.prompt) installiert werden? $(pc g)itprompt.sh / $(pc s)impleprompt.sh / kei$(pc n)er [g/s/N]"  'n'
+	if is_no; then
+		break
+	elif is G; then
+		install_symlink ".prompt" "prompt/gitprompt.sh"
+		dfl_promptcolor='5190'
+		ask_promptcolor='[1m${color}❮[0m ${color}mst[0;38;5;121m*${color}${colno}[0m [1m~/[1m${color}❯[0m'
+		break
+	elif is S; then
+		install_symlink ".prompt" "prompt/simpleprompt.sh"
+		dfl_promptcolor='34'
+		ask_promptcolor='[1m${colno}[0m@host:[1m~[1m${color}\$[0m'
+		break
+	fi
 done
+
+if [ -n "$ask_promptcolor" ]; then
+	echo "[1;36m ------------------------------------------------------------------------------ [0m"
+	for i in $(seq 31  37); do showcolordemo 7 $i            "[${i}m"      "$ask_promptcolor  "; done
+	for i in $(seq  1 254); do showcolordemo 7 $((5000 + i)) "[38;5;${i}m" "$ask_promptcolor  "; done
+	echo ""
+	echo "[1;36m ------------------------------------------------------------------------------ [0m"
+	echo ""
+
+	while true; do
+		ask "Welche Prompt-Farbe soll verwendet werden? [$dfl_promptcolor]" "$dfl_promptcolor"
+		if [ -n "$ANSWER" ] && [ "$ANSWER" -ge 31 ] 2>/dev/null && [ "$ANSWER" -le 37 ]; then
+			store_prompt_color "[${ANSWER}m"
+			break
+		elif [ -n "$ANSWER" ] && [ "$ANSWER" -ge 5001 ] 2>/dev/null && [ "$ANSWER" -le 5254 ]; then
+			store_prompt_color "[38;5;$((ANSWER - 5000))m"
+			break
+		fi
+	done
+fi
 
 ask_symlink ".vimrc" "vim/vimrc"
 if is_yes; then
