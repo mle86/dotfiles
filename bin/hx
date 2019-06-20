@@ -221,6 +221,7 @@ while (<>) {
 	my $is_apache;
 	my $is_rfc5424;
 	my $is_dmesg;
+	my $is_nginx_fastcgi;
 	my $is_continuation_line = (m/^\s*(?:#\d+\b|URI:|Referr?er:|User-?[Aa]gent:|Stack trace:$|CLI:|  thrown in | {16,})/);
 	if ($is_continuation_line) {
 		print $contlinestart;
@@ -235,7 +236,7 @@ while (<>) {
 	my $re_time   = '(?:\d\d:\d\d:\d\d)';
 	my $re_ms     = '(?:[\.,]\d{1,6})';
 	my $re_ddd    = '(?:[A-Za-z]{2,3} +\d+)';
-	my $re_ymd    = '(?:\d\d\d\d-\d\d-\d\d|\d\d\d\d\.\d\d\.\d\d)';
+	my $re_ymd    = '(?:\d\d\d\d-\d\d-\d\d|\d\d\d\d\/\d\d\/\d\d|\d\d\d\d\.\d\d\.\d\d)';
 	my $re_tz     = '(?:[\+\-]\d\d(?::?\d\d)?|Z)';
 	my $re_ts8601 = "(?:${re_ymd}T${re_time}${re_ms}?(?:$re_tz)?)";  # 2019-07-07T18:22:34.001Z
 	my $re_tsw    = "(?:\\d{1,2}-\\w{2,4}-\\d{4} ${re_time}${re_ms}?)";  # 07-Jun-2019 11:36:20.106
@@ -339,6 +340,21 @@ while (<>) {
 		print format_loglevel($4);
 		$message_isolated = 1;
 		$loglevel_isolated = 1;
+	} elsif (s/^($re_ymd $re_time$re_ms? )(\[$re_loglevel\] )?(\d+(?:#\d+)?: )(\*\d+ ?)?(FastCGI sent in (?:stderr|stdout): )(")//i) {
+		# nginx + fastcgi
+		print format_date($1);
+		print format_loglevel($2)  if $2;
+		print format_app($3);
+		print format_info_prefix($4)  if $4;
+		print format_info_prefix($5);
+		print $c_bold . format_info_prefix($6) . $c_unbold  if $6;
+		$is_nginx_fastcgi = 1;
+		$message_isolated = 1;
+		$loglevel_isolated = 1  if $2;
+		if (s/(")((?: while reading response header from upstream)?, client: ${re_client}, (?:server:|request:).*)$//s) {
+			# end of fastcgi message should not affect main message parsing, it's a mostly boring wrapper -- so cut it out and put it into $suffix
+			$suffix = $c_bold . format_info_prefix($1) . $c_unbold . format_info($2) . $suffix;
+		}
 	} elsif (s/^($re_ymd $re_time$re_ms?|$re_ts8601|$re_tsw|\[$re_ymd $re_time$re_ms?\])( |:|$)//) {
 		print format_date($1 . $2);
 		$message_isolated = 1;
@@ -354,7 +370,7 @@ while (<>) {
 		}
 	}
 
-	if ($message_isolated && !$loglevel_isolated && s/^(<$re_loglevel>  ?|$re_loglevel:  ?)//) {
+	if ($message_isolated && !$loglevel_isolated && s/^(<$re_loglevel>  ?|\[$re_loglevel\][: ]|$re_loglevel:  ?)//) {
 		print format_loglevel($1);
 		$loglevel_isolated = 1;
 	} elsif ($message_isolated && !$loglevel_isolated && s/^($re_loglevel) (\[\S+\]) ([a-z]+(?:\.\w+)+ )?//) {
@@ -384,7 +400,7 @@ while (<>) {
 		$loglevel_isolated = 1;
 	}
 
-	if ($message_isolated && s/^( *(?:PHP Fatal error:  ?)?(?:Uncaught )?)($re_exception)(: +)//) {
+	if ($message_isolated && s/^( *(?:PHP message:  ?)?(?:PHP Fatal error:  ?)?(?:Uncaught )?)($re_exception)(: +)//) {
 		print $1;
 		print format_exception($2);
 		print $3;
