@@ -59,7 +59,7 @@ my $contlinestart = "${c_contsym}●${c0} ";
 sub format_date ($) { $c_date . $_[0] . $c0 }
 sub format_host ($) { $c_host . $_[0] . $c0 }
 sub format_message ($) { $c_message . $_[0] . $c0 }
-sub format_app  ($) { $c_app  . $_[0] . $c0 }
+sub format_app  ($) { $c_app . $_[0] . $c0 }
 sub format_rpt ($) { $c_rpt . $_[0] . $c0 }
 sub format_meta ($) { $c_meta . $_[0] . $c0 }
 
@@ -142,6 +142,27 @@ sub format_http ($) {
 	return $c_http . $status . $c0;
 }
 
+sub format_postfix_info ($) {
+	my ($info, $out, $c_pfinfo, $c_hi, $c_lo) = ($_[0], '', $c_info, $c_bold, $c_unbold);
+
+	my $re_replycode = '[2345]\d\d';
+	my $re_dsn       = '\d\.\d\.\d';
+
+	$info =~ s/(?<=[\( ])(${re_replycode}(?:[\- ](?:${re_dsn})?)?)\b/ $c_hi . $1 . $c_lo /ge;
+
+	$c_pfinfo . $info . $c0
+}
+
+sub format_postfix_status ($) {
+	my ($status, $c_status) = ($_[0], '');
+
+	if    ($status =~ m/^(?:2\.\d\.\d|sent|delivered|ok)/) { $c_status = $c_http_success }
+	elsif ($status =~ m/^(?:4\.\d\.\d|deferred)/) { $c_status = $c_http_client_error }
+	elsif ($status =~ m/^(?:5\.\d\.\d|bounced)/) { $c_status = $c_http_client_failure }
+	elsif ($status =~ m/^(?:1\.\d\.\d|error)/) { $c_status = $c_http_server_error }
+	return $c_status . $status . $c0
+}
+
 sub format_info ($;$) {
 	my ($in, $c_info) = ($_[0], $_[1] // $c_info);
 	if ($in =~ m/^( *\[)(\d\d\d)(\])$/ && ($2 >= 100 && $2 <= 599)) {
@@ -219,6 +240,7 @@ while (<>) {
 	}
 
 	my $is_apache;
+	my $is_postfix;
 	my $is_rfc5424;
 	my $is_dmesg;
 	my $is_nginx_fastcgi;
@@ -240,10 +262,9 @@ while (<>) {
 	my $re_tz     = '(?:[\+\-]\d\d(?::?\d\d)?|Z)';
 	my $re_ts8601 = "(?:${re_ymd}T${re_time}${re_ms}?(?:$re_tz)?)";  # 2019-07-07T18:22:34.001Z
 	my $re_tsw    = "(?:\\d{1,2}-\\w{2,4}-\\d{4} ${re_time}${re_ms}?)";  # 07-Jun-2019 11:36:20.106
-	my $re_host   = '[A-Za-z][A-Za-z0-9_\-\.]+';
-	my $re_host   = '(?:[A-Za-z][A-Za-z0-9_\-\.]+)';
 	my $re_app    = '(?:[A-Za-z/][A-Za-z0-9_\-\./]+?(?:\[\d+\]|\])?)';
 	my $re_word   = '(?:[A-Z][a-z]+)';
+	my $re_host   = '(?:[A-Za-z][A-Za-z0-9_\-\.]+)';
 	my $re_ip     = '(?:\[(?:[0-9a-fA-F]{1,4})?(?:::?[0-9a-fA-F]{1,4}){1,7}\]|(?:[0-9a-fA-F]{1,4})?(?:::?[0-9a-fA-F]{1,4}){1,7}|\d{1,3}(?:\.\d{1,3}){3})';
 	my $re_client = "(?:$re_ip|$re_host)";
 	my $re_mysqld = '(?:(?:\\/usr\\/sbin\\/)?mysqld: )';
@@ -256,7 +277,9 @@ while (<>) {
 		# syslog format
 		print format_date($1) . ' ';
 		print format_host($2) . ' ';
-		print format_app($3 . $4) . '';
+		#print format_app($3 . $4) . '';
+		print format_app($3 . $4);
+		$is_postfix = 1  if ($3 =~ m/^postfix/);
 		$message_isolated = 1;
 	} elsif (s/^($re_ddd {1,2}$re_time) ($re_host) (\d+) ($re_ts8601) ($re_host) ($re_app|-) (\d+|-) (\S+) //) {
 		# syslog RFC-5424 format
@@ -451,6 +474,9 @@ while (<>) {
 		print format_http($2);
 		print format_info($3);
 		$text_isolated = 1;
+	} elsif ($message_isolated && $is_postfix) {
+		s/(?<=dsn=)([\d\.]+)(?=, status=)/ format_postfix_status($1) /e;
+		s/\b(dsn|status|from|to|orig_to|relay|client|message-id)(=)/ $c_bold . $1 . $c_unbold . $2 /ge;
 	}
 
 
@@ -480,6 +506,11 @@ while (<>) {
 		s/^((?=\{")$re_json)$/ format_json($1, '') /e;
 	}
 
+	if ($message_isolated && $is_postfix && s/(\s*\(.+\))$//) {
+		$suffix = format_postfix_info($1) . $suffix;
+	}
+
+	if (s/([\r\n]+)$//) { $suffix .= $1 }
 	print;
 	print $suffix;
 	flush STDOUT;
