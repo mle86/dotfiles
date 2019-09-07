@@ -24,6 +24,7 @@ ci = commit
 ciam = commit --amend
 shw = show
 f = fetch
+psuh = push
 
 [push]
 default = simple
