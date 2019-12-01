@@ -118,6 +118,11 @@ noremap  <F1> <ESC>
 cnoremap <F1> <C-C>
 inoremap <F1> <ESC>
 
+" Repeated_Indent:  Support repeated indent/dedent in selection through auto-reselect
+" (https://wincent.com/blog/indenting-and-dedenting-in-vim)
+xnoremap < <gv
+xnoremap > >gv
+
 
 "" Filetype_Specific_Configuration:  """""""""""""""""""""""""""""""""""""""""""
 
