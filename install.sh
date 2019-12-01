@@ -86,6 +86,21 @@ if is_yes; then
 	fi
 fi
 
+ask "$(hi diff-so-fancy) als git-Pager installieren? [y/N]" 'n'
+if is_yes; then
+	if ! grep -q 'pager = diff-so-fancy' "$HOME/.gitconfig-extra"; then
+		( cat ; echo ) >> "$HOME/.gitconfig-extra" <<-EOT
+			[core]
+			pager = diff-so-fancy | less --tabs=4 -R
+		EOT
+	fi
+	if ! [ -f "$HOME/bin/diff-so-fancy" ]; then
+		mkdir -vp -- "$HOME/bin/"
+		wget 'https://github.com/so-fancy/diff-so-fancy/blob/master/third_party/build_fatpack/diff-so-fancy' -O "$HOME/bin/diff-so-fancy"
+		chmod +x "$HOME/bin/diff-so-fancy"
+	fi
+fi
+
 # now ask about every bin/ script:
 for file in $(binfiles); do
 	[ "$file" = "git-color-annotate" ] && continue  # already handled
