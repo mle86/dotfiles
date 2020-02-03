@@ -56,6 +56,7 @@ _setgitprompt () {
 	      stash_symbol_color='\[[0;38;5;239m\]' \
 	      info_color="\\[[0m[0m${PROMPTCOLOR:-"[38;5;190m"}\\]" \
 	      cwd_color='\[[1;37m\]' \
+	      archv_color='\[[38;5;222m\]' \
 	      sgr0='\[[0m\]'
 	local local_commits_color="$info_color" \
 	      branch_color="$info_color" \
@@ -92,8 +93,20 @@ _setgitprompt () {
 
 	local prefix="$prefix_color❮$stashes"
 	local suffix="$suffix_color❯ "
+	local cwd="\\w"
 
-	PS1="$prefix$branch$rebase$changes$remote_commits$local_commits$cwd_color\\w$suffix$sgr0"
+	if [ "$WALK_IN_ARCHIVE" ]; then
+		cwd="$(pwd)"
+
+		local archvcut="${cwd#"$WALK_IN_ARCHIVE"}"
+		[ "$archvcut" != "$cwd" ] && cwd="$(dirname -- "$WALK_IN_ARCHIVE")/$archv_color$(basename -- "$WALK_IN_ARCHIVE")$cwd_color$archvcut"
+
+
+		local homecut="${cwd#"${HOME%"/"}"}"
+		[ "$homecut" != "$cwd" ] && cwd="~$homecut"
+	fi
+
+	PS1="$prefix$branch$rebase$changes$remote_commits$local_commits$cwd_color$cwd$suffix$sgr0"
 
 	# show current path in terminal headline:
 	case "$TERM" in
