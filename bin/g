@@ -8,7 +8,7 @@ PROGNAME=$(basename -- "$0")
 
 SEPARATOR=','
 PATTERNOPT='-e'
-grepoptions="--line-number --ignore-case --color=always"
+grepoptions="--line-number --ignore-case --color=always --line-buffered"
 greppatterns=
 
 syntax () {
