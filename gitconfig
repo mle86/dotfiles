@@ -23,6 +23,8 @@ tags = tag -l
 ci = commit
 ciam = commit --amend
 shw = show
+showe = show
+hsow = show
 f = fetch
 psuh = push
 
