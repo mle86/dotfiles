@@ -79,6 +79,7 @@ alias ga='git add -p'
 alias gd='git diff --diff-algorithm=minimal --find-renames'
 alias gdc='git diff --diff-algorithm=minimal --find-renames --cached'
 alias grc='git rebase --continue'
+alias gra='git rebase --autostash'
 
 gco () {
 	# reverse gitprompt's branch name shortening:
