@@ -123,9 +123,17 @@ inoremap <F1> <ESC>
 xnoremap < <gv
 xnoremap > >gv
 
+" Ctrl_Space: quit, but safely
+noremap <Nul> :q<CR>
+
+" Ctrl_Backspace: abort the current git commit/merge msg edit
+"   by clearing the entire buffer, then saving+quitting
+autocmd FileType gitcommit,gitrebase noremap <C-H> :%d<CR>:wq<CR>
+
 
 "" Filetype_Specific_Configuration:  """""""""""""""""""""""""""""""""""""""""""
 
-autocmd BufRead,BufNewFile *.md  set softtabstop=4 shiftwidth=4 expandtab
-autocmd BufRead,BufNewFile *.php set softtabstop=4 shiftwidth=4 expandtab | colorscheme mle-php
+autocmd BufRead,BufNewFile *.md   set softtabstop=4 shiftwidth=4 expandtab
+autocmd BufRead,BufNewFile *.json set softtabstop=4 shiftwidth=4 expandtab
+autocmd BufRead,BufNewFile *.php  set softtabstop=4 shiftwidth=4 expandtab | colorscheme mle-php
 
