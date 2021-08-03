@@ -182,6 +182,34 @@ tfx () {
 	tf "$@" | hx
 }
 
+_get_project_container_name () {
+	case "$1" in
+		micro-*)	echo "$1" ;;
+		*)
+			echo "project root is not a known container name: $1"  >&2
+			return 1
+			;;
+	esac
+}
+
+DX () {
+	# find git project root, it should be in a suitably-named dir:
+	local root= dir= container=
+	root="$(git rev-parse --show-toplevel)" || return
+	dir="$(basename -- "$root")"
+	container="$(_get_project_container_name "$dir")"
+	dx "$container" "$@"
+}
+
+DL () {
+	# find git project root, it should be in a suitably-named dir:
+	local root= dir= container=
+	root="$(git rev-parse --show-toplevel)" || return
+	dir="$(basename -- "$root")"
+	container="$(_get_project_container_name "$dir")"
+	docker logs --tail=30 --follow "$container" "$@" | hx
+}
+
 lastpow () {
 	[ -n "$1" ] || set -- '/var/log/auth.log'
 	local line= brk='
