@@ -35,6 +35,14 @@ alias l='ls $LS_OPTIONS -l'
 alias la='ls $LS_OPTIONS -la'
 
 mkcd () {
+	local ansi_warning='[1;38;5;208m' ansi_reset='[0m'
+	if [ -d "$1" ]; then
+		echo "${ansi_warning}mkcd: Already exists: $1" >&2
+		# ok continue
+	elif [ -e "$1" ]; then
+		echo "${ansi_warning}mkcd: Already exists but is not a directory: $1" >&2
+		return 1
+	fi
 	mkdir -p -- "$@" && command cd -- "$1"
 }
 
