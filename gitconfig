@@ -27,6 +27,8 @@ showe = show
 hsow = show
 f = fetch
 psuh = push
+pusjh = push
+puhs = push
 
 [push]
 default = simple

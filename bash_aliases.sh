@@ -169,6 +169,9 @@ typo_alias () {
 }
 typo_alias cmhod chmod
 typo_alias ivm   vim
+typo_alias tuig  tig
+typo_alias compoesr composer
+typo_alias compsoer composer
 
 tf () {
 	[ -n "$1" ] || set -- '/var/log/syslog'
