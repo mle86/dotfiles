@@ -119,6 +119,41 @@ gco () {
 	eval git checkout $args
 }
 
+gci () {
+	if [ $# -gt 0 ]; then
+		local args="$*"
+		local suffix=
+		local br='
+'
+		while true; do
+			local lastword="$(printf '%s' "$args" | awk 'NF{ print $NF }')"
+			[[ "$lastword" =~ ^[t#]\ ?[0-9]+$ ]] || break
+
+			args="${args%"$lastword"*}"
+			lastword="${lastword#[t#]}"
+			lastword="${lastword#" "}"
+			[ -n "$suffix" ] && lastword="$lastword, "
+			printf "SFX[%s] LW[%s]\n" "$suffix" "$lastword"
+			suffix="#$lastword$suffix"
+		done
+		case "$suffix" in
+			'')	;;
+			*","*)	set -- "${args}${br}${br}tickets ${suffix}" ;;
+			*)	set -- "${args}${br}${br}ticket ${suffix}" ;;
+		esac
+	fi
+	git commit --edit --message="$*"
+}
+
+gss () {
+	local index="${1:-0}"
+	if [ "$index" = "-" ]; then
+		git stash list
+	else
+		git show -v "stash@{$index}" --
+	fi
+}
+
 myip () {
 	local dev= devs='eth0 wlan0 enp0s31f6 wlp61s0 enp0s25 wlp4s0 enp4s0'
 	( for dev in $devs; do ip addr show dev $dev 2>/dev/null; done ) | \
