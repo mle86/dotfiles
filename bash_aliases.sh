@@ -68,6 +68,15 @@ cd () {
 	fi
 }
 
+L () {
+	local lineno="$1" ; shift
+	[ "$#" -eq 0 ] && set -- '-'
+	while [ $# -gt 0 ]; do
+		tail -n "+$lineno" -- "$1" | head -n 1
+		shift
+	done
+}
+
 alias '..'='command cd ..'
 alias '...'='command cd ../..'
 alias -- '-'='command cd - >/dev/null'
