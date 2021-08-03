@@ -88,7 +88,6 @@ alias keep='IGNOREEOF=99'
 
 alias c99='gcc -O -std=c99 -Wall -Wextra -pedantic'
 alias c89='gcc -O -std=c89 -Wall -Wextra -pedantic'
-alias c='c99'
 
 alias gs='git status'
 alias gb='git branch -avv'
