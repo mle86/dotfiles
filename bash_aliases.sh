@@ -209,47 +209,6 @@ DL () {
 	docker logs --tail=30 --follow "$container" "$@" | hx
 }
 
-lastpow () {
-	[ -n "$1" ] || set -- '/var/log/auth.log'
-	local line= brk='
-'
-	local color_on='[1;32m' color_off='[1;31m'
-	local color_open='[38;2;169;205;134m' color_close='[38;2;222;135;135m' c0='[0m'
-	zgrep \
-		-e 'New seat seat0.'		\
-		-e 'System is powering down.'	\
-		-e 'Lid opened.'		\
-		-e 'Lid closed.'		\
-		-a "$@" | \
-	while read -r line; do
-		! [ -t 1 ] && printf '%s\n' "$line" && continue
-		local prefix= suffix=
-		case "$line" in
-			*"New seat"*)      prefix="$color_on" ; suffix="$c0" ;;
-			*"powering down"*) prefix="$color_off" ; suffix="$c0$brk" ;;
-			*"Lid opened"*)    prefix="$color_open" ; suffix="$c0" ;;
-			*"Lid closed"*)    prefix="$color_close" ; suffix="$c0" ;;
-		esac
-		printf '%s%s%s\n' "$prefix" "$line" "$suffix"
-	done
-}
-
-todo () {
-	# Syntax:  todo [TARGET=.]...
-	# Greps all files in the current directory for 'TODO'.
-	# Greps in other directories instead if there are any directory arguments.
-	# Also greps all plain files which are given as arguments.
-
-	local grepopt='--color=always -i -n'
-	local grepre='\bTODOs\?\b'
-
-	[ -n "$1" ] || set -- '.'
-
-	find "$@" -maxdepth 1 -type f -print0	| \
-	  xargs -0r grep $grepopt -- "$grepre"			| \
-	    less -FRX
-}
-
 grepf () {
 	if [ -z "$2" ]; then
 		echo "Syntax:" >&2

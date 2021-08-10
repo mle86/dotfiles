@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Syntax:  todo [TARGET=.]...
+# Greps all files in the current directory for 'TODO'.
+# Greps in other directories instead if there are any directory arguments.
+# Also greps all plain files which are given as arguments.
+
+grepopt='--color=always -i -n'
+grepre='\bTODOs\?\b'
+
+[ -n "$1" ] || set -- '.'
+
+find "$@" -maxdepth 1 -type f -print0		| \
+  xargs -0r grep $grepopt -- "$grepre"		| \
+    less -FRX
+
