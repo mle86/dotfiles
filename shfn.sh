@@ -10,6 +10,10 @@ binfiles () { ls -1 bin/ ; }
 ansi_prompt_symbol='[1;33m'  # yellow
 ansi_prompt_symbol2="$ansi_dark[1m"  # dark grey
 
+line () {
+	printf '%s%s%s\n' '[1;36m' '--------------------------------------------------------------------------------' "$ansi_reset"
+}
+
 # pc word...
 #  Shortcut for prompt character highlighting (bold + underlined).
 pc () { UL "$@" ; }

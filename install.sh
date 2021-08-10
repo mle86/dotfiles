@@ -4,11 +4,14 @@ set -e
 
 ################################################################################
 
+
 ask_symlink ".gitconfig" "gitconfig"
 ask_symlink ".inputrc" "inputrc"
 ask_symlink ".bash_aliases" "bash_aliases.sh"
 ask_symlink ".rest_fn.sh" "rest_fn.sh"
 ask_symlink ".templates" "templates/"
+
+line
 
 dfl_promptcolor=
 ask_promptcolor=
@@ -77,15 +80,6 @@ if is_yes; then
 	$HERE/cfg/confpatch.pl -b -i $HOME/.config/vlc/vlcrc                   $HERE/cfg/vlcrc.patch.ini
 fi
 
-ask_symlink "bin/git-color-annotate"
-if is_yes; then
-	ask "Git-Aliases $(hi ann) und $(hi annot) für color-annotate anlegen? [Y/n]"  'y' 1
-	if is_yes; then
-		git config -f $HOME/.gitconfig-extra alias.ann   color-annotate
-		git config -f $HOME/.gitconfig-extra alias.annot color-annotate
-	fi
-fi
-
 ask "$(hi diff-so-fancy) als git-Pager installieren? [y/N]" 'n'
 if is_yes; then
 	if ! grep -q 'pager = diff-so-fancy' "$HOME/.gitconfig-extra"; then
@@ -101,7 +95,19 @@ if is_yes; then
 	fi
 fi
 
+
+line
 # now ask about every bin/ script:
+
+ask_symlink "bin/git-color-annotate"
+if is_yes; then
+	ask "Git-Aliases $(hi ann) und $(hi annot) für color-annotate anlegen? [Y/n]"  'y' 1
+	if is_yes; then
+		git config -f $HOME/.gitconfig-extra alias.ann   color-annotate
+		git config -f $HOME/.gitconfig-extra alias.annot color-annotate
+	fi
+fi
+
 for file in $(binfiles); do
 	[ "$file" = "git-color-annotate" ] && continue  # already handled
 
