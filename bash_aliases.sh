@@ -23,9 +23,6 @@ fi
 
 export PATH="$PATH:$HOME/bin"
 
-export IBUS_ENABLE_SYNC_MODE=1
-  # needed for ibus <1.5.11 to fix this problem: https://youtrack.jetbrains.com/issue/IDEA-78860
-
 export HISTSIZE=8000
 
 
@@ -80,11 +77,13 @@ L () {
 alias '..'='command cd ..'
 alias '...'='command cd ../..'
 alias -- '-'='command cd - >/dev/null'
-alias d='cd ~/Schreibtisch/ 2>/dev/null || cd ~/Desktop/'
+alias d='cd ~/Desktop/'
 alias n='cd ~/Downloads/'
 
 alias shlvl='echo $SHLVL'
 alias keep='IGNOREEOF=99'
+
+alias iws='sudo iwlist scan'
 
 alias c99='gcc -O -std=c99 -Wall -Wextra -pedantic'
 alias c89='gcc -O -std=c89 -Wall -Wextra -pedantic'
@@ -154,7 +153,7 @@ gss () {
 }
 
 myip () {
-	local dev= devs='eth0 wlan0 enp0s31f6 wlp61s0 enp0s25 wlp4s0 enp4s0'
+	local dev= devs='eth0 wlan0 enp2s0f0 enp5s0 wlp3s0'
 	( for dev in $devs; do ip addr show dev $dev 2>/dev/null; done ) | \
 		grep -e 'inet ' -e 'inet6' |\
 		grep -P '(?<!brd) [0-9a-f]+[:\.][0-9a-f:\.]+'
@@ -171,6 +170,7 @@ typo_alias ivm   vim
 typo_alias tuig  tig
 typo_alias compoesr composer
 typo_alias compsoer composer
+unset -f typo_alias
 
 tf () {
 	[ -n "$1" ] || set -- '/var/log/syslog'
@@ -248,10 +248,6 @@ todo () {
 	find "$@" -maxdepth 1 -type f -print0	| \
 	  xargs -0r grep $grepopt -- "$grepre"			| \
 	    less -FRX
-}
-
-sdl () {
-	svn diff "$@" | less -R --quit-if-one-screen
 }
 
 grepf () {
@@ -349,8 +345,6 @@ o () {
 		shift
 	done
 }
-
-alias iws='sudo iwlist scan'
 
 # pg [-GREPOPTION...] [--] [TERM...]
 #  Calls `ps -ef' and filters its output,
