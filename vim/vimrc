@@ -77,7 +77,7 @@ set background=dark
 syntax on
 
 hi Comment ctermfg=darkgrey
-hi LineNr ctermfg=0 ctermbg=0 cterm=bold
+hi LineNr ctermfg=darkgrey ctermbg=0
 
 " show trailing spaces as small grey circles, show nbsp as "⎵".  (⚫,⚬)
 " vim.wikia.com/wiki/Highlight_unwanted_spaces
