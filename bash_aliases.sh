@@ -410,12 +410,33 @@ set_ls_colors () {
 set_ls_colors ; unset -f set_ls_colors
 
 
+###  Lazy Loading:  ##############################################
+
+# _defer_load SCRIPTFILE COMMAND...
+#  Assumes that SCRIPTFILE contains the COMMAND shell function(s)
+#  and sets up a proxy function that will load the scriptfile on-demand.
+#  Used to speed up terminal initialization because this function
+#  is probably shorter than the actual function definitions.
+_defer_load () {
+	local script="$1" ; shift
+	while [ "$#" -gt 0 ]; do
+		local command="$1" ; shift
+		# $command () { unset -f $command ; . $script ; $@ ; }
+		eval "$(printf '%q () { unset -f %q ; . %q ; %q "$@" ; }' "$command" "$command" "$script" "$command")"
+	done
+}
+
+_defer_load ~/.rest_fn.sh rest rest_auth rest_header rest_baseurl
+
+unset -f _defer_load
+
+
 ###  Includes:  ##################################################
 
 [ -r ~/.promptcolor ] && . ~/.promptcolor
 [ -r ~/.prompt ] && . ~/.prompt
 [ -r ~/.extra ] && . ~/.extra
-[ -r ~/.rest_fn.sh ] && . ~/.rest_fn.sh
+#[ -r ~/.rest_fn.sh ] && . ~/.rest_fn.sh
 
 
 ###  Ende  #######################################################
