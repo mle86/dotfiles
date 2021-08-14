@@ -155,7 +155,7 @@ gss () {
 myip () {
 	local dev= devs='eth0 wlan0 enp2s0f0 enp5s0 wlp3s0'
 	( for dev in $devs; do ip addr show dev $dev 2>/dev/null; done ) | \
-		grep -e 'inet ' -e 'inet6' |\
+		grep 'inet6\? ' |\
 		grep -P '(?<!brd) [0-9a-f]+[:\.][0-9a-f:\.]+'
 	curl https://ip.eul.cc/
 }
