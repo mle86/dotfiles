@@ -41,3 +41,5 @@ path = .gitconfig-extra
 
 [rebase]
 	instructionFormat = %ai %s
+[init]
+	defaultBranch = main
