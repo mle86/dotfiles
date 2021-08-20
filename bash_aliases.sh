@@ -241,9 +241,15 @@ dx () {
 	# This will print an error and exit if the container is not found:
 	docker inspect "$container" >/dev/null || return
 
-	[ -n "$1" ] || set -- "$SHELL"
+	local message="Entering docker container '$container'"
 
-	echo "[1mEntering docker container '$container' with command '$@':[0m"  >&2
+	if [ -n "$1" ]; then
+		message="$message with command '$@'"
+	else
+		set -- "$SHELL"
+	fi
+
+	printf "%s%s%s\n"  '[1m' "$message:" '[0m'  >&2
 
 	docker exec -t -i "$container" "$@"
 }
