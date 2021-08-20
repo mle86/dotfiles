@@ -365,6 +365,13 @@ nx () {
 	return $status
 }
 
+fuck () {
+	local lastcmd="$(history -p '!!')"
+	local newcmd="sudo $lastcmd"
+	history -s "$newcmd"  # replace this "fuck" history entry with the correct sudo call
+	bash -c -- "$newcmd"  # now actually execute the sudo call
+}
+
 
 ###  Farben:  ####################################################
 
