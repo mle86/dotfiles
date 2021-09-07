@@ -131,7 +131,6 @@ gci () {
 			lastword="${lastword#[t#]}"
 			lastword="${lastword#" "}"
 			[ -n "$suffix" ] && lastword="$lastword, "
-			printf "SFX[%s] LW[%s]\n" "$suffix" "$lastword"
 			suffix="#$lastword$suffix"
 		done
 		case "$suffix" in
