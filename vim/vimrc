@@ -128,7 +128,7 @@ noremap <Nul> :q<CR>
 
 " Ctrl_Backspace: abort the current git commit/merge msg edit
 "   by clearing the entire buffer, then saving+quitting
-autocmd FileType gitcommit,gitrebase noremap <C-H> :%d<CR>:wq<CR>
+autocmd FileType gitcommit,gitrebase noremap <C-H> :%d _<CR>:wq<CR>
 
 
 "" Filetype_Specific_Configuration:  """""""""""""""""""""""""""""""""""""""""""
