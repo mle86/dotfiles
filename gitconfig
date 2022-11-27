@@ -26,9 +26,16 @@ shw = show
 showe = show
 hsow = show
 f = fetch
+mergfe = merge
 psuh = push
 pusjh = push
 puhs = push
+poush = push
+psouh = push
+puish = push
+pushg = push
+reste = reset
+reest = reset
 
 [push]
 default = simple
