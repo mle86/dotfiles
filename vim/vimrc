@@ -151,6 +151,7 @@ call SetupCommandAlias("Qa",  "qa")
 "" Filetype_Specific_Configuration:  """""""""""""""""""""""""""""""""""""""""""
 
 autocmd BufRead,BufNewFile *.md   set softtabstop=4 shiftwidth=4 expandtab
+autocmd BufRead,BufNewFile composer.lock set syntax=json
 autocmd BufRead,BufNewFile *.json set softtabstop=4 shiftwidth=4 expandtab
 autocmd BufRead,BufNewFile *.php  set softtabstop=4 shiftwidth=4 expandtab | colorscheme mle-php
 
