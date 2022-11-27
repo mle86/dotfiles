@@ -5,6 +5,7 @@ name = mle
 email = maximilian@eul.cc
 
 [core]
+excludesfile = ~/.dotfiles/gitignore
 
 [color]
 ui = auto
