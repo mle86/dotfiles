@@ -7,7 +7,7 @@ if [ "$USER" != "root" ]; then
 fi
 
 _gitinfo () {
-	local local_commits= remote_commits= changes= rebase_commit= stashes= gitdir=
+	local local_commits= remote_commits= changes= rebase_state= stashes= gitdir=
 	local branch=$(git rev-parse  --abbrev-ref HEAD  2>/dev/null)
 
 	if [ "$branch" = "HEAD" ]; then
@@ -16,8 +16,14 @@ _gitinfo () {
 		if [ -d "$gitdir/rebase-merge/" ]; then
 			# it's an interactive rebase
 			branch=$(git rev-parse  --abbrev-ref "$(cat -- "$gitdir/rebase-merge/head-name")")
-			current_commit=$(git rev-parse  --short "$(cat -- "$gitdir/rebase-merge/stopped-sha")")
-			rebase_commit="$current_commit"
+			if [ -s "$gitdir/rebase-merge/stopped-sha" ]; then
+				current_commit=$(git rev-parse  --short "$(cat -- "$gitdir/rebase-merge/stopped-sha")")
+				rebase_state="$current_commit"
+			elif [ -s "$gitdir/rebase-merge/done" ]; then
+				rebase_state="$(tail -n1 -- "$gitdir/rebase-merge/done" 2>/dev/null)"
+			else
+				rebase_state="???"
+			fi
 		elif [ -z "$current_commit" ]; then
 			# it's a fresh repo
 			branch="INIT"
@@ -45,7 +51,7 @@ _gitinfo () {
 		[ -n "$_remote_ahead" ] && [ "$_remote_ahead" -gt 0 ] && remote_commits="$_remote_ahead"
 	fi
 
-	echo -e "$changes:$local_commits:$remote_commits:$rebase_commit:$stashes:$branch"
+	echo -e "$changes:$local_commits:$remote_commits:$rebase_state:$stashes:$branch"
 }
 
 _setgitprompt () {
