@@ -94,12 +94,25 @@ if [ $# -gt 3 ]; then
 	echo "$PROGNAME: too many arguments, $(($# - 3)) ignored" >&2
 fi
 
-outputfile="$(mktemp)"
+
+is_HEAD_request=
+if [ "$method" = "HEAD" ] || [ "$method" = "head" ]; then
+	is_HEAD_request=yes
+	outputfile=
+	add_extra_option --output '/dev/null'
+else
+	outputfile="$(mktemp)"
+	add_extra_option --output "$outputfile"
+fi
+
 output=
 info=
 errst=0
 
-if [ -n "$data" ]; then
+if [ "$is_HEAD_request" ]; then
+	add_extra_option --head
+elif [ -n "$data" ]; then
+	add_extra_option --data "$data"
 	add_extra_option --header 'Content-type: application/json'
 else
 	add_extra_option --header 'Content-type:'
@@ -116,10 +129,8 @@ done
 
 curlcall () { eval "curl \
 	--silent --show-error				\
-	--output \"\$outputfile\"			\
 	-v						\
 	-X \"\$method\"					\
-	--data \"\$data\"				\
 	$extra_options					\
 	\"\$url\" ; "
 }
@@ -139,10 +150,10 @@ if info="$(curlcall 2>&1)"; then
 	printf '%s\n' "$headers" | fmt_headers >&2
 
 	# show response body on stdout:
-	cat -- "$outputfile"
+	[ "$outputfile" ] && cat -- "$outputfile"
 
 	# add a trailing linebreak if the output does not contain one:
-	[ -s "$outputfile" ] && [ "$(tail -c 1 -- "$outputfile")" != "" ] && echo ""
+	[ "$outputfile" ] && [ -s "$outputfile" ] && [ "$(tail -c 1 -- "$outputfile")" != "" ] && echo ""
 
 else
 	errst="$?"
@@ -153,6 +164,6 @@ else
 	printf "$c0"  >&2
 fi
 
-rm -f -- "$outputfile"
+[ "$outputfile" ] && rm -f -- "$outputfile"
 exit "$errst"
 
