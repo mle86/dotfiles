@@ -248,6 +248,13 @@ dx () {
 	# This will print an error and exit if the container is not found:
 	docker inspect "$container" >/dev/null || return
 
+	local opts=
+
+	while [ "-${1#"-"}" = "$1" ]; do
+		opts="$opts $1"
+		shift
+	done
+
 	local message="Entering docker container '$container'"
 
 	if [ -n "$1" ]; then
@@ -258,7 +265,7 @@ dx () {
 
 	printf "%s%s%s\n"  '[1m' "$message:" '[0m'  >&2
 
-	docker exec -t -i "$container" "$@"
+	docker exec -t -i $opts "$container" "$@"
 }
 
 # T [filename=test.sh]
