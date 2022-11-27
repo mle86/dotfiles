@@ -175,6 +175,8 @@ typo_alias () {
 typo_alias cmhod chmod
 typo_alias ivm   vim
 typo_alias tuig  tig
+typo_alias tiug  tig
+typo_alias tiog  tig
 typo_alias compoesr composer
 typo_alias compsoer composer
 unset -f typo_alias
