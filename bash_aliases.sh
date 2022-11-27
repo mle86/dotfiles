@@ -118,6 +118,9 @@ gco () {
 	eval git checkout $args
 }
 
+# gci COMMIT-MESSAGE... [tTICKETNR...]
+#  Alias for git-commit which automatically takes a commit message from the arguments.
+#  Opens an editor to confirm the commit msg.
 gci () {
 	if [ $# -gt 0 ]; then
 		local args="$*"
