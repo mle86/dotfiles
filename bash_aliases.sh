@@ -164,7 +164,7 @@ myip () {
 	( for dev in $devs; do ip addr show dev $dev 2>/dev/null; done ) | \
 		grep 'inet6\? ' |\
 		grep -P '(?<!brd) [0-9a-f]+[:\.][0-9a-f:\.]+'
-	curl https://ip.eul.cc/
+	curl -s https://ip.eul.cc/ | grep .
 }
 
 typo_alias () {
