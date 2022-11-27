@@ -29,11 +29,30 @@ add_extra_option () {
 	done
 }
 
+is_debug_header () {
+	case "$(printf '%s\n' "$1" | tr '[:upper:]' '[:lower:]')" in
+		"x-debug-"*)
+			true ;;
+		*)
+			false ;;
+	esac
+}
+
+urldecode () {
+	printf '%s\n' "$*" | perl -p -e 's/\\+/ /g; s/%(..)/chr hex $1/ge;'
+}
+
 fmt_headers () {
 	local key value
 	local IFS=':'
 	while read -r key value; do
 		[ -n "$key" ] || continue
+
+		if is_debug_header "${key#"< "}"; then
+			# decode "%20"-style hex characters:
+			value="$(urldecode "$value")"
+		fi
+
 		printf "${c_status}%s%s${c0}\n" "$key" "${value:+":${c_status_value}$value"}"
 	done
 }
