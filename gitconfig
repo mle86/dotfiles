@@ -51,3 +51,9 @@ path = .gitconfig-extra
 	instructionFormat = %ai %s
 [init]
 	defaultBranch = main
+[pull]
+	rebase = false
+[rerere]
+	enabled = 1
+[format]
+	pretty = fuller
