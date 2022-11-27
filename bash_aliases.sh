@@ -394,6 +394,20 @@ fuck () {
 	bash -c -- "$newcmd"  # now actually execute the sudo call
 }
 
+calc () {
+	# Command-line calculator with float and parentheses support.
+	# Any non-significant decimal suffix (N.000, N., N.xxx000) will be removed.
+	printf '%s\n' "$*" | bc -l | \
+		perl -p -e 's/(?:(\..*[1-9]++)|\.)0*$/\1/'
+		#perl -p -e 's/(?:\..*[1-9]++\K|(?=\.))\.?0*$//'  # slightly more pcre steps but doesn't use backreferences
+}
+
+int () {
+	# Truncates any number of floats to integers.
+	# For multiple arguments it prints multiple lines, one per result.
+	printf '%s / 1\n' "$@" | bc
+}
+
 
 ###  Farben:  ####################################################
 
