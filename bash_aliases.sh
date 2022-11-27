@@ -215,7 +215,7 @@ DL () {
 	root="$(git rev-parse --show-toplevel)" || return
 	dir="$(basename -- "$root")"
 	container="$(_get_project_container_name "$dir")"
-	docker logs --tail=30 --follow "$container" "$@" | hx
+	docker logs --tail=30 --follow "$container" "$@" 2>&1 | hx
 }
 
 grepf () {
