@@ -131,6 +131,23 @@ noremap <Nul> :q<CR>
 autocmd FileType gitcommit,gitrebase noremap <C-H> :%d _<CR>:wq<CR>
 
 
+"" Typos:  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" https://stackoverflow.com/a/3879737
+fun! SetupCommandAlias(from, to)
+  exec 'cnoreabbrev <expr> '.a:from
+        \ .' ((getcmdtype() is# ":" && getcmdline() is# "'.a:from.'")'
+        \ .'? ("'.a:to.'") : ("'.a:from.'"))'
+endfun
+
+call SetupCommandAlias("W",   "w")
+call SetupCommandAlias("Wq",  "wq")
+call SetupCommandAlias("Wn",  "wn")
+call SetupCommandAlias("Q",   "q")
+call SetupCommandAlias("Qw",  "qw")
+call SetupCommandAlias("Qa",  "qa")
+
+
 "" Filetype_Specific_Configuration:  """""""""""""""""""""""""""""""""""""""""""
 
 autocmd BufRead,BufNewFile *.md   set softtabstop=4 shiftwidth=4 expandtab
