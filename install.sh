@@ -71,6 +71,7 @@ done
 ask "Desktop-Defaults (dconf) einspielen? [y/N]" 'n'
 if is_yes; then
 	$HERE/dconf/dconf.pl $HERE/dconf/*.conf
+	$HERE/dconf/terminal-word-separators.sh  || true
 fi
 
 ask "Desktop-Defaults (ini/rc) einspielen? [y/N]" 'n'
